@@ -1,0 +1,15 @@
+{
+  "extEnable": true,
+  "extAppid": "wxde87f955d769c707",
+  "ext": {
+    "company_id": "1",
+    "appid": "wxde87f955d769c707",
+    "wxa_name": "苏心淘福利"
+  },
+  "window": {
+      "backgroundTextStyle": "light",
+      "navigationBarBackgroundColor": "#fff",
+      "navigationBarTitleText": "苏心淘福利",
+      "navigationBarTextStyle": "black"
+  }
+}

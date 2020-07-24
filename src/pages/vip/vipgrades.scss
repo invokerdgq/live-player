@@ -1,0 +1,302 @@
+@import "../../style/imports";
+
+page{
+  background: white;
+}
+.container{
+  position: relative;
+  top:VH($nav-gap-height);
+  min-height: VH-last($nav-gap-height + 80px);
+  background: white;
+}
+.header {
+    padding: 30px;
+		color:white;
+    background: $color-theme;
+  &-title{
+    text-align: center;
+    font-size: 32px;
+  }
+  &-grade_name{
+    font-size: 23px;
+    background: linear-gradient(to right bottom, #fca280, #e75fa9);
+    height: 30px;
+    border-radius: 15px;
+    width: 120px;
+    text-align: center;
+
+  }
+		.header-isauth{
+			display: flex;
+			align-items: center;
+			padding: 20px;
+			&__avatar{
+				width: 100px;
+				height: 100px;
+				line-height: 100px;
+				border-radius: 50%;
+				background: #e4e2d0;
+				color: #fff;
+				font-size: 80px;
+				text-align: center;
+			}
+
+			&__info{
+				padding-left: 26px;
+				.mcode {
+					font-size: 24px;
+					color: #ffffff;
+				}
+				.nickname {
+					font-size: 28px;
+					margin-bottom: 5px;
+				}
+			}
+		}}
+.choose-gift,.choose-address{
+  padding: 15px 50px;
+  display: flex;
+  flex-direction: row;
+  font-size: 32px;
+}
+.right{
+  margin-left: auto;
+  font-size: 24px;
+}
+.vip-1,.vip-2{
+  &-button{
+    position: fixed;
+    bottom: 5px;
+    width: 700px;
+    display: flex;
+    flex-direction: row;
+    height: 75px;
+    line-height: 75px;
+    justify-content: center;
+    color:white;
+    margin-top: 50px;
+    &-dec{
+      flex:3;
+      background: #5f5f5f;
+      border-radius: 37.5px 0 0 37.5px;
+      text-align: center;
+      &-1{
+        font-size: 30px;
+        margin-right: 15px;
+      }
+      &-2{
+        font-size: 16px;
+      }
+      &-3{
+        font-size: 23px;
+      }
+    }
+    &-click{
+      flex:2;
+      background: $color-theme;
+      border-radius:  0 37.5px 37.5px 0;
+      text-align: center;
+    }
+  }
+}
+.vip-1,.vip-2{
+  width: 700px;
+  margin: 0 auto;
+  &-title{
+    font-size: 30px;
+    font-weight: bold;
+    display: inline-block;
+    color: $button-back-black;
+    .dot{
+      position: relative;
+      top:-10px
+    }
+    margin-bottom: 15px;
+  }
+  &-content{
+    width: 700px;
+    margin: 30px 0;
+    padding: 15px 25px;
+    box-shadow: 0 0 6px 0 #b3b1b1;
+    text-align: left;
+    color:#2f2f2f;
+    &-title{
+      font-size: 23px;
+      font-weight: bold;
+    }
+    .icon{
+      display: inline-block;
+      font-style: italic;
+      width: 18px;
+      height: 18px;
+      font-size: 17px;
+      border-radius: 8px;
+      background:#2f2f2f;
+      color:white;
+      text-align: center;
+      line-height: 18px;
+    }
+    &-subtitle{
+      font-size: 17px;
+    }
+  }
+}
+.section-body-vip{
+  width: 700px;
+  margin: 0 auto;
+  .card-container{
+    margin:  25px auto;
+    border-radius: 30px;
+    text-align: center;
+  }
+  .code{
+    margin: 20px 0;
+    &-inner{
+      font-size: 32px;
+      padding: 15px 50px;
+      display: flex;
+      flex-direction: row;
+      color:#2f2f2f;
+      justify-content: space-between;
+    }
+  }
+}
+.body-presist{
+  text-align: center;
+  color: white;
+  width: 400px;
+  height: 48px;
+  line-height: 48px;
+  border-radius: 24px;
+  background: $color-theme;
+  margin: 80px auto;
+}
+.commission-header{
+  width: 100vw;
+  height: 390px;
+  padding: 80px 0;
+  background: $color-theme;
+  color:white;
+  text-align: center;
+  &-title{
+    font-size: 45px;
+  }
+  &-mount{
+    font-size: 24px;
+    .inner{
+      font-size: 57px;
+      margin-left: 10px;
+    }
+  }
+  &-dec{
+    font-size: 24px;
+    margin-top: 40px;
+  }
+}
+
+.vip-1-button-container{
+  width: 100vw;
+  background: white;
+  position: fixed;
+  bottom: 0;
+}
+.vip-1-button{
+    position: fixed;
+    bottom: 5px;
+    left:50%;
+    transform: translate(-50%,0);
+    width: 700px;
+    &-button{
+      display: flex;
+      flex-direction: row;
+      height: 75px;
+      line-height: 75px;
+      justify-content: center;
+      color:white;
+      margin-top: 50px;
+      &-dec{
+        flex:3;
+        background: #5f5f5f;
+        border-radius: 37.5px 0 0 37.5px;
+        .inner{
+          font-size: 18px;
+        }
+        &-1{
+          font-size: 30px;
+          margin-right: 15px;
+        }
+        &-2{
+          font-size: 16px;
+        }
+        &-3{
+          font-size: 23px;
+        }
+      }
+      &-click{
+        flex:2;
+        background: $color-theme;
+        border-radius:  0 37.5px 37.5px 0;
+      }
+    }
+}
+.inner{
+  font-size: 22px;
+}
+.scroll-dec{
+  height: 100vh;
+}
+.commission-body-title{
+  padding-left: 35px;
+  font-size: 32px;
+  color:#2f2f2f
+}
+.item-content{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 20px 20px 30px;
+  border-bottom: solid 2px #eeeeee;
+  .item-left{
+    &-name{
+      font-size: 32px;
+      color:#2f2f2f;
+      margin: 15px 0;
+      Image{
+        width: 24px;
+        height: 24px;
+      }
+    }
+    &-type,&-time,&-remark{
+      font-size: 24px;
+      color:#8b8b8b;
+      margin-top: 8px;
+    }
+  }
+  .item-right{
+    color:$color-theme;
+    text-align: right;
+    .iconfont{
+      font-size: 30px;
+    }
+    &-mount{
+      font-size: 38px;
+    }
+    .detail{
+      font-size: 24px;
+    }
+  }
+}
+.goods-dec-item-content{
+  border-bottom: dashed 2px #eeeeee;
+  padding: 20px 35px;
+ .goods-dec-item{
+   font-size: 24px;
+   color:#2f2f2f;
+   line-height: 1.4;
+ }
+  .goods-status{
+    text-align: right;
+    color:$color-theme
+  }
+}

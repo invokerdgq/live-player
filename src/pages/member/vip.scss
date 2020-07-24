@@ -1,0 +1,351 @@
+@import "../../style/imports";
+page{
+  background: white;
+}
+.vip-header{
+  position: relative;
+  top:VH($nav-gap-height);
+  height: VH-last($nav-gap-height + 80px);
+  background: white;
+  overflow: auto;
+}
+.vip{
+  background: #f6f5f5;
+  &-card-swiper{
+    height: 350px;
+  }
+  &-sort-title{
+    font-size: 30px;
+    font-weight: bold;
+    color:$button-back-black;
+  }
+  &-sort-container{
+    display: flex;
+    height: 80px;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: center;
+    .vip-sort-look{
+      font-size: 23px;
+      position: absolute;
+      border-bottom: 0;
+      right: 10px;
+    }
+  }
+  .item-img{
+    width: 450px;
+    height: 250px;
+  }
+  .swiper-item{
+    padding: 50px 0;
+    margin:0 20px;
+  }
+}
+.vip-similar-0{
+  margin-top: 15px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 20px 0;
+  Image{
+    width: 80vw;
+  }
+}
+.vip-similar-1,.vip-similar-2{
+  margin-top: 15px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 20px 0;
+  Image{
+    width: 80vw;
+  }
+}
+.vip-own{
+  text-align: center;
+  margin: 50px 25px;
+  .vip-0-container{
+    text-align: center;
+  }
+  .vip-0{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    &-title{
+      font-size: 30px;
+      font-weight: bold;
+      display: inline-block;
+      color: $button-back-black;
+      .dot{
+        position: relative;
+        top:-10px
+      }
+      margin-bottom: 15px;
+    }
+    &-button{
+      display: inline-block;
+      height: 50px;
+      line-height: 50px;
+      width: 320px;
+      border-radius: 25px;
+      background: $color-theme;
+      color:white;
+      font-size: 25px;
+    }
+  }
+  .vip-1,.vip-2{
+    width: 700px;
+    margin: 0 auto;
+    &-title{
+      font-size: 30px;
+      font-weight: bold;
+      display: inline-block;
+      color: $button-back-black;
+      .dot{
+        position: relative;
+        top:-10px
+      }
+      margin-bottom: 15px;
+    }
+    &-content{
+      width: 700px;
+      margin: 30px 0;
+      padding: 15px 25px;
+      box-shadow: 0 0 6px 0 #ededed;
+      text-align: left;
+      color:#2f2f2f;
+      &-title{
+        font-size: 23px;
+        font-weight: bold;
+        margin: 15px;
+      }
+      .icon{
+        display: inline-block;
+        font-style: italic;
+        width: 18px;
+        height: 18px;
+        font-size: 17px;
+        border-radius: 8px;
+        background:#2f2f2f;
+        color:white;
+        text-align: center;
+        line-height: 18px;
+      }
+      &-subtitle{
+        font-size: 17px;
+      }
+    }
+  }
+  .vip-1,.vip-2{
+    &-button{
+      position: fixed;
+      bottom: 5px;
+      display: flex;
+      width: 700px;
+      flex-direction: row;
+      height: 75px;
+      line-height: 75px;
+      justify-content: center;
+      color:white;
+      margin-top: 50px;
+      &-dec{
+        flex:3;
+        background: #5f5f5f;
+        border-radius: 37.5px 0 0 37.5px;
+        &-1{
+          font-size: 30px;
+          margin-right: 15px;
+        }
+        &-2{
+          font-size: 16px;
+        }
+        &-3{
+          font-size: 23px;
+        }
+      }
+      &-click{
+        flex:2;
+        background: $color-theme;
+        border-radius:  0 37.5px 37.5px 0;
+      }
+    }
+  }
+}
+.vip-fixed{
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  background: #000000;
+  opacity: 0.38;
+  z-index:300
+}
+.vip-fixed-top{
+  position: fixed;
+  flex-direction: column;
+  bottom: 170px;
+  left:50vw;
+  transform: translate(-50%,0);
+  width: 360px;
+  height: 450px;
+  border-radius: 40px;
+  background: white;
+  z-index:400;
+  box-shadow: 0 0 8px 0 #ededed;
+  &-body{
+    text-align: center;
+    Image{
+      width: 230px;
+      height: 230px;
+    }
+  }
+  &-title{
+    text-align: center;
+    margin-top: 30px;
+    &-dec{
+      font-size: 20px;
+    }
+    &-code{
+      font-size: 40px;
+    }
+  }
+  &-body{
+    border-top:dashed 1px grey;
+  }
+  &-bottom{
+    height: 48px;
+    line-height: 48px;
+    width: 330px;
+    color:white;
+    font-size: 22px;
+    background: $color-theme;
+    border-radius: 24px;
+    text-align: center;
+    margin: 10px auto;
+  }
+}
+.vip-fixed-bottom{
+  position: fixed;
+  flex-direction: column;
+  justify-content: flex-end;
+  bottom: 0;
+  width: 100vw;
+  height: 180px;
+  background: white;
+  z-index:300;
+  &-container{
+    display: flex;
+    flex-direction: row;
+    .message-item{
+      position: relative;
+      top:10px;
+      width: 250px;
+      text-align: center;
+      Button{
+        font-size: 28px;
+        line-height: 1.5;
+        background: white;
+      }
+      Button:after{
+        border: none;
+      }
+    }
+    .iconfont{
+      font-size: 50px;
+    }
+}
+  &-controll{
+    text-align: center;
+    background: #c7c7c7;
+    height: 60px;
+    line-height: 60px;
+    margin: 20px 0 0 ;
+  }
+}
+.canvas-container{
+  width: 100vw;
+  height: 100vh;
+  color:#000000;
+  opacity: 0.38;
+  position: absolute;
+  z-index: 1000;
+}
+.own-canvas{
+  z-index: 1001;
+  position: fixed;
+  bottom:170px;
+  background: white;
+  left:50%;
+  transform: translate(-50%,0);
+  border-radius: 30px;
+  box-shadow: 0 0 8px 0 #ededed;
+}
+
+
+.test{
+  z-index: 1300;
+  width: 400px;
+  height: 400px;
+}
+.img-container{
+  z-index: 1300;
+  position: fixed;
+  width: 70vw;
+  text-align: center;
+  padding:100px 0;
+  background: white;
+  top:50%;
+  left:50%;
+  transform: translate(-50%,-50%);
+  border-radius: 40px;
+  .img-controll{
+    text-align: center;
+    margin: 30px 30px 0;
+    height: 50px;
+    border-radius: 25px;
+    background: $color-theme;
+    color:white;
+    line-height: 50px;
+  }
+  .close{
+    background: grey;
+    color: white;
+    position: absolute;
+    top:20px;
+    right: 20px;
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    line-height: 40px;
+    border-radius: 50%;
+  }
+
+}
+.scroll-coupon{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  padding-bottom: 20px;
+  margin-top: 20px;
+  height: 220px;
+  .coupon-item{
+    flex: none;
+    width: 260px;
+    height: 140px;
+    margin-right: 20px;
+    Image{
+      width: 100%;
+      height: 100%;
+    }
+  }
+}
+.quanyi-1{
+  Image{
+    width: 700px;}
+}
+.button-bottom{
+  width: 100%;
+  background: white;
+}

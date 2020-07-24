@@ -1,0 +1,15 @@
+@import '../../style/imports';
+
+.more{
+  position: relative;
+  display: inline-block;
+}
+.own-hidden{
+visibility: hidden;
+  width: 100%;
+}
+.true-content{
+  position: absolute;
+  top:0;
+  left:0
+}

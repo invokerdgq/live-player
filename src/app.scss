@@ -1,0 +1,158 @@
+@import "./style/theme.scss";
+@import "./style/variables.scss";
+@import "./style/layout.scss";
+@import "./style/myiconfont.scss";
+
+$font-size-base: $font-size;
+$hd: 2 !default; // 基本单位
+$color-brand: $color-brand-primary;
+$color-brand-light: $color-brand-accent;
+$color-brand-dark: $color-brand-accent-light;
+$color-text-base: $color-primary-text;
+$at-button-border-color-secondary: $color-border-gray;
+
+@import "~taro-ui/dist/style/index.scss";
+@import "./style/taro-ui-mod.scss";
+
+body, view {
+  font-family: $font-family;
+  font-size: $font-size;
+  box-sizing: border-box;
+}
+
+page, body {
+  background: $color-bg-gray;
+  color: $color-primary-text;
+}
+.at-badge{
+  &__num{
+    background: #c0534e;
+  }
+}
+
+.lnk {
+  color: $color-link;
+}
+
+.lock-screen {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  overflow: hidden;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.sec {
+  background: #fff;
+  margin: 0 0 $edge-margin;
+  &-hd {
+    display: flex;
+    line-height: 1;
+    align-items: center;
+    padding: $edge-size;
+    .more {
+      color: $color-link;
+      font-size: $font-size-small;
+      margin-right: floor(-$edge-size / 4);
+    }
+    .at-icon {
+      font-size: $font-size-large;
+    }
+  }
+  &-title {
+    flex: 1;
+  }
+  &-ft {
+    color: $color-gray-light;
+    margin-right: floor(-$edge-size / 4);
+    .at-font {
+      font-size: $font-size-large;
+    }
+  }
+}
+
+.btns {
+  button, .at-button {
+    margin: 0 0 $edge-margin;
+  }
+  padding: $edge-margin $edge-size;
+}
+
+.toolbar {
+  &.toolbar-inline {
+    .at-button, at-button {
+      width: 100%;
+    }
+  }
+  background: #fff;
+  font-size: $font-size;
+  display: flex;
+  height: $toolbar-height;
+  box-shadow: $toolbar-shadow;
+  box-sizing: border-box;
+  padding: $edge-margin $edge-size;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  align-items: center;
+  align-content: center;
+  justify-content: space-between;
+  z-index: $z-index-toolbar;
+  .at-button {
+    font-size: $font-size;
+  }
+  &-hd {}
+  &-ft {
+    max-width: 120px;
+  }
+}
+
+switch, .weui-switch {
+  transform: scale(0.6);
+  transform-origin: center right;
+}
+
+.search-input__bar {
+  .at-search-bar {
+    &__input {
+      line-height: 30PX - 10PX;
+    }
+  }
+}
+.at-countdown__item{
+  color:#A0A0A0;
+  .at-countdown__time-box {
+    .at-countdown__time {
+      color:#A0A0A0;
+      font-family: "Hiragino Sans GB","微软雅黑","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol" !important;
+    }
+  }
+}
+.at-countdown--card .at-countdown__time-box{
+ background-color:#ff7b01 ;
+  width: 33px;
+  height: 33px;
+  font-size:20px ;
+  border-radius: 8px;
+  border: none;
+  .at-countdown__time{
+    color:white
+  }
+  .at-countdown__separator{
+    color:black;
+  }
+}
+.at-countdown--card .at-countdown__time-box::after{
+  display: none !important;
+}
+.at-tab-bar{
+  height: 120px;
+}
+.img__widthfix{
+  width: 100%;
+}
+

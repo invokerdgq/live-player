@@ -1,0 +1,121 @@
+@import '../../../style/imports';
+
+.at-badge{
+  &__num{
+    background: #c0534e !important;
+    width: 100px;
+  }
+}
+.goods-buy-toolbar {
+  background: #fff;
+  height: $toolbar-height;
+  box-sizing: border-box;
+  padding: $edge-margin 0;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  z-index: $z-index-toolbar;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 0 -5px rgba(#000, 0.3);
+  button {
+    border: none;
+  }
+  &__menus {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+  }
+  &__menu-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: $font-size-small;
+    color: #9d9d9d;
+    padding: 4px 0 0;
+    margin: 0;
+    line-height: 1;
+    background: none;
+    border: none;
+    &:before, &:after {
+      border: none;
+    }
+    .icon-xing-quan{
+      font-size: 50px;
+      margin: 0 0 8px;
+      color: #9d9d9d;
+    }
+    .icon-xingxing , .icon-che,.icon-shouye {
+      font-size: 50px;
+      text-align: center;
+    }
+    .dec{
+      font-size: 20px;
+      margin-top: 5px;
+    }
+    &-text {
+      font-size: $font-size-small;
+      color: #555;
+    }
+  }
+  &__btns {
+    width: 450px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    height: $toolbar-height;
+  }
+  &__btn {
+    //width: 200px;
+    //font-size: $font-size;
+    font-size: 28px;
+    font-weight: normal;
+    flex: 1;
+    text-align: center;
+    height: $toolbar-height - 60px;
+    line-height: $toolbar-height - 60px;
+    color: #fff;
+    border: none;
+    border-radius: ($toolbar-height - 60px)/2;
+    //font-weight: bold;
+    white-space: nowrap;
+    &.drug-btn {
+      width: 400px;
+    }
+    &.marketing-btn {
+      width: 400px;
+    }
+    &:before, &:after {
+      display: none;
+    }
+  }
+  .btn-add-cart-container {
+    width: 225px;
+    background-color: white;
+    padding: 30px 10px;
+    box-sizing: border-box;
+  }
+  .btn-fast-buy-container {
+    width:225px;
+    background-color: white;
+    padding: 30px 10px;
+    box-sizing: border-box;
+  }
+  .btn-add-cart{
+    background-color: #c0534e;
+    color:white;
+  }
+  .btn-fast-buy {
+    margin-left: -1px;
+    background-color: white;
+    color:#c0534e;
+    border: solid 1px #c0534e;
+  }
+  .form-id-collector {
+    flex: 1;
+    overflow: hidden;
+  }
+
+}

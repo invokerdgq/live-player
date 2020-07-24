@@ -1,0 +1,45 @@
+@import "../../../style/imports";
+
+page{
+  background: #ffd4b2;
+}
+.gift{
+  position: relative;
+  .goods-list{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 0 26px;
+    justify-content: space-between;
+    margin-bottom: 30px;
+  }
+  &-content{
+    width: 650px;
+    height: 830px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-left: 50px;
+    position: absolute;
+    top:650px;
+    left:8px;
+    &-title{
+      margin: 10px 0 10px;
+    }
+    &-dec{
+      text-align: center;
+      font-size: 22px;
+      color: #d5d7dc;
+    }
+  }
+  &-header{
+    .img{
+      width: 100%;
+    }
+  }
+  &-footer{
+    .img{
+      width: 100%;
+    }
+  }
+}

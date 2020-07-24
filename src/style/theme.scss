@@ -1,0 +1,37 @@
+$font-size                 : 14px * 2;
+$edge-margin               : 16px;
+
+$color-theme               : #c0534e;
+$color-bg-gray             : #f5f5f5;
+$color-gray                : #818181;
+$color-price               : $color-theme;
+$color-brand-primary       : $color-theme;
+$color-brand-accent        : #fba629 !default;
+$color-brand-accent-light  : #787878 !default;
+$color-brand-primary-text  : #ffffff !default;
+$color-brand-accent-text   : #ffffff !default;
+
+$item-border-radius        : 8px;
+$cart-border-radius				 : 10px;
+$home-header-height        : 90px !default;
+$home-search-height        : 110px !default;
+$tabs-height               : 75px !default;
+$navigate-height           : 160px !default;
+$searchbar-height          : 65px !default;
+$toolbar-height            : 120px !default;
+$tabbar-height             : 0px !default;
+
+$at-tab-bar-color          : #818181 !default;
+$at-tab-bar-color-active   : $color-brand-primary !default;
+$at-tab-bar-font-size      : 22px !default;
+$at-tab-bar-icon-font-size : 42px !default;
+$at-button-height          : 80px !default;
+
+$nav-gap-height            : 150px !default;
+$base-height               : 667px !default;
+
+
+$px-rpx                    :2  !default;
+
+$specs-back                : #f6f6f6;
+$button-back-black         : #393838;

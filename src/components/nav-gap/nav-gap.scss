@@ -1,0 +1,45 @@
+@import "../../style/theme";
+@import "../../style/mixins";
+
+.nav-gap{
+  &-container{
+    height: VH($nav-gap-height);
+    background-color: white;
+    position: fixed;
+    width: 100vw;
+    top:0;
+    //display: flex;
+    //flex-direction: row;
+    //justify-content: center;
+    //align-items: center;
+    z-index: 1;
+    .icon-arrow-left{
+      position: absolute;
+      font-size: 45px;
+      left:30px;
+      transform: translate(0,-50%);
+    }
+    .gap-title{
+      font-size: 35px;
+      text-align: center;
+      position: relative;
+      transform: translate(0,-50%);
+    }
+  }
+  &-icon{
+    .icon-arrow-left{
+      position: relative;
+      font-size: 35px;
+      right: 320px;
+      top:54px
+    }
+  }
+  &-title{
+    font-size: 35px;
+    position: absolute;
+    top:54px
+  }
+}
+.invisibilty{
+  visibility: hidden;
+}
