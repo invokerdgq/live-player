@@ -19,11 +19,24 @@
   .order-contain{
     position: absolute;
     left:0;
-    top:0
+    top:0;
+    text-align: center;
+    .contain-order{
+      background: rgba(0,0,0,0.52);
+      width:40px ;
+      height: 40px;
+    }
+    .true-contain{
+      position: absolute;
+      line-height: 40px;
+      left:50% !important;
+      top:0 !important;
+      transform: translate(-50%,0);
+    }
   }
   .order{
     font-size: 20px;
-    color:red
+    color:red;
   }
   .goods-dec{
     display: flex;
@@ -57,8 +70,4 @@
   }
 }
 
-  .contain-order{
-    background: rgba(0,0,0,0.48);
-    width:40px ;
-    height: 40px;
-  }
+

@@ -25,6 +25,7 @@ export default class Live extends Component{
     super(props);
     this.state = {
       ...this.state,
+      timer:null,
       pullStreamLink:'',
       room_status:'',
       type:'',
@@ -51,16 +52,19 @@ export default class Live extends Component{
     // entry.entryLaunch(this.$router.params)
     const {appId,token} =this.$router.params
     this.initTim()
+   this.nextPage()
   }
 
-
+  async componentWillUnmount(){
+    this.statusSend('off')
+  }
 
 initTim = async  () => {
   const  extraData  = Taro.getStorageSync('extraData')
   // Taro.setStorageSync('auth_token',extraData.token)
   this.setState({
     pullStreamLink:extraData.room_live_link,
-    room_status:1
+    room_status:extraData.room_status||1
   })
    const {user_id = 1,userSig,url} = await api.live.getUserSig({owner:0})
   console.log(user_id)
@@ -72,7 +76,7 @@ initTim = async  () => {
   tls = new TLS ({
     SDKAppID: '1400395128',
     // SDKAppID: '1400895128',
-    roomID: '58662927',
+    roomID: extraData.im_id ||'58662927',
     userSig: userSig,
     userName: user_id,
     TIM:TIM
@@ -91,9 +95,10 @@ initTim = async  () => {
         groupInfo,
         userInfo
       } = await tls.joinRoom({
-        roomID:'58662927',
+        roomID:extraData.im_id ||'58662927',
         getOwnerInfo:true
       })
+      this.statusSend('on')
       this.setState({
         userInfo,
         groupInfo,
@@ -105,16 +110,34 @@ initTim = async  () => {
       console.log(e)
     }
   })
-  // this.state.userInfo = userInfo
-  // this.state.groupInfo = groupInfo
-  // this.state.ownerInfo = groupInfo.ownerInfo
-  // this.state.noticeText = groupInfo.notification
 }
 
+statusSend(type){
+  const  extraData  = Taro.getStorageSync('extraData')
+  if(type === 'on'){
+    let timer = setInterval(() => {
+      try{
+        api.live.changeUserStatus({room_id:extraData.im_id||'58662927',status:type})
+      }catch (e) {
+        console.log(e)
+      }
+    },1000*60*3)
+    this.setState({
+      timer
+    })
+  }else{
+    this.state.timer.clear()
+    try{
+      api.live.changeUserStatus({room_id:extraData.im_id||'58662927',status:type})
+    }catch (e) {
+      console.log(e)
+    }
+  }
 
+}
 initMintor() {
   //有人加群
-  let formate = this.formate()
+  let formate = this.formate
   tls.on(TLS.EVENT.JOIN_GROUP, async (data) => {
     console.log('已经加入了群聊', Math.random())
     let msg = this.handleMsgLength()
@@ -195,18 +218,18 @@ handleMsgLength(){
     }
   return arr
   }
-
-  formate(name,add=false){
-    return name + add?':':''
+  formate = (name,add=false)=>{
+    return `${name}${add?' :':''}`
   }
 
 handleSendMessage =(e) =>{
     console.log('----------888--------------')
     console.log(this.state)
    tls.sendMessage(e.detail.value).then((res) => {
+     console.log(res)
         let msg = this.handleMsgLength();
         msg.push({
-          user_name: this.formate(this.state.userInfo.nick,true),
+          user_name: this.formate(res.nick,true),
           user_message: e.detail.value,
         })
      this.setState({
@@ -215,34 +238,36 @@ handleSendMessage =(e) =>{
      })
    })
 }
-  // fetch = async (params)=>{
-  //   const {page_no,page_size} = params
-  //   if(this.state.watcherType === 'com'){
-  //     const option = {
-  //       page:page_no,
-  //       pageSize:page_size,
-  //       type:this.state.watcherType
-  //     }
-  //     const {list,total_count} = api.live.getWatcherList(option)
-  //     let total = total_count
-  //     this.setState({
-  //       watcherList:[...this.state.watcherList,...list]
-  //     })
-  //     return {total}
-  //   }else{
-  //     const option = {
-  //       page:page_no,
-  //       pageSize:page_size,
-  //       type:this.state.watcherType
-  //     }
-  //     const {list,total_count} = api.live.getWatcherList(option)
-  //     let total = total_count
-  //     this.setState({
-  //       onlineList:[...this.state.onlineList,...list]
-  //     })
-  //     return {total}
-  //   }
-  // }
+  fetch = async (params)=>{
+    const  extraData  = Taro.getStorageSync('extraData')
+    const {page_no,page_size} = params
+    if(this.state.watcherType === 'com'){
+      const option = {
+        page:page_no,
+        pageSize:page_size,
+        room_id:extraData.im_id ||'58662927'
+      }
+      const {list,total_count} = api.live.getOnlineRoom(option)
+      let total = total_count
+      this.setState({
+        watcherList:[...this.state.watcherList,...list]
+      })
+      return {total}
+    }else{
+      const option = {
+        page:page_no,
+        pageSize:page_size,
+        room_id:extraData.im_id ||'58662927'
+      }
+      const {list,total_count} = api.live.getOnlineRoom(option)
+      let total = total_count
+      this.setState({
+        onlineList:[...this.state.onlineList,...list]
+      })
+      return {total}
+    }
+  }
+
   clickBack(){
     Taro.navigateBackMiniProgram()
   }
@@ -285,7 +310,7 @@ handleSendMessage =(e) =>{
       case 'like':
         tls.like().then(async function(data) {
           Taro.showToast({title:'点赞成功'})
-           const res = await api.live.giveLike({room_id:extraData.im_id})
+           const res = await api.live.giveLike({room_id:extraData.im_id||'58662927'})
         })
         break
       case 'attend':
@@ -298,9 +323,14 @@ handleSendMessage =(e) =>{
         })
     }
   }
-  clearMessage(){
+  clearMessge(){
     this.setState({
       inputMessage:''
+    })
+  }
+  changeValue (e){
+    this.setState({
+      inputMessage:e.detail.value
     })
   }
   render() {
@@ -385,7 +415,7 @@ handleSendMessage =(e) =>{
                 </View>
                 <View className='live-footer-message'>
                   {
-                    msgList.map((item,index) => {
+                    msgList.reverse().map((item,index) => {
                       return (
                         <OwnOpacity
                           containerClass={'message'}
@@ -401,7 +431,7 @@ handleSendMessage =(e) =>{
             <View className='live-footer-feature'>
               <View className='opc'>
                 <View className='send-message'/>
-                <Input type='text' placeholder='说点什么...' className='input' placeholderClass='holder' onConfirm={this.handleSendMessage.bind(this)} value={inputMessage}/>
+                <Input type='text' placeholder='说点什么...' className='input' placeholderClass='holder' onConfirm={this.handleSendMessage.bind(this)} value={inputMessage} onInput={this.changeValue.bind(this)}/>
               </View>
               <View className='more'>
                 <View className='more-item' onClick={this.showMoreDec.bind(this,'cart-detail')}>
@@ -426,7 +456,7 @@ handleSendMessage =(e) =>{
           }
           {
             type === 'live-detail'&&
-              <View className='live-detail'>
+              <View className='live-detail' onClick={this.stop}>
                  <View className='live-detail-avatar'>
                    <Image mode='widthFix' className='img'/>
                  </View>
@@ -463,7 +493,7 @@ handleSendMessage =(e) =>{
                     scrollY
                     enableFlex={true}
                     className='watcher-scroll-list'
-                    onScrollToLower={this.nextPage()}
+                    onScrollToLower={this.nextPage}
                   >
                     <View className='item-list'>
                       {
@@ -484,7 +514,7 @@ handleSendMessage =(e) =>{
           }
           {
             type === 'cart-detail'&&
-              <View className='cart-detail'>
+              <View className='cart-detail' onClick={this.stop}>
                 <View className='cart-detail-title'>共xx件商品</View>
                 <View className='cart-detail-list'>
                   <ScrollView

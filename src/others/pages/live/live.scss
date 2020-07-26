@@ -363,6 +363,10 @@
        top:50px;
        display: flex;
        flex-direction: column;
+       justify-content: flex-end;
+       padding-bottom: 50px;
+       overflow: hidden;
+       height: 100%;
      }
     .message{
       max-width: 690px;

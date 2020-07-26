@@ -18,12 +18,13 @@ export default class GoodsItem extends Component{
           <Image mode='widthFix' className='img'/>
           <View className='order-contain'>
             <OwnOpacity
-              containerClass='contain-order'
+              contain-class={'contain-order'}
+              true-class={'true-contain'}
               renderTrue={
-                <View className='order'>1</View>
+                <Text className='order'>1</Text>
               }
               renderHide={
-                <View>1</View>
+                <Text className='order'>1</Text>
               }
             />
           </View>
