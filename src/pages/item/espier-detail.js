@@ -1306,6 +1306,7 @@ export default class Detail extends Component {
 
           {
             info && <GoodsBuyPanel
+              room_id={this.$router.params.room_id}
               assist_id={this.$router.params.assist_id}
               level={this.$router.params.level}
               info={info}

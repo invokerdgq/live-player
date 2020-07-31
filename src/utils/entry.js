@@ -19,13 +19,18 @@ async function entryLaunch(data, isNeedLocate) {
   } else {
     options = data
   }
-
   // 如果没有带店铺id
   if (!options.dtid) {
     let { distributor_id } = Taro.getStorageSync('curStore')
     if (distributor_id) {
       options.dtid = distributor_id
     }
+  }
+  if(options.im_id){
+    Taro.setStorageSync('im_id',options.im_id)
+  }
+  if(options.is_share){
+    Taro.setStorageSync('is_share',true)
   }
   if(options.assist_id){
     Taro.setStorageSync('assist_id',options.assist_id)

@@ -1,4 +1,15 @@
 @import "../../../style/imports";
+@keyframes gift {
+  0%   {left: 0;top: 0;transform: scale(1,1)}
+  25%  {left: 100px;top: -100px;transform: scale(1.5,1.5) rotate(360deg)}
+  50%  {left: 0;top: -200px;transform: scale(2,2) rotate(720deg)}
+  75%  {left: -100px;top: -300px;transform: scale(1.5,1.5) rotate(360deg);opacity: 1}
+  100% {left: 0;top: -400px;transform: scale(1,1) ;opacity: 0}
+}
+@keyframes out {
+  0%   {opacity: 1}
+  100%   {opacity: 0}
+}
 
 .icon-arrow-left{
   position: absolute;
@@ -17,6 +28,7 @@
   background: white;
 }
 .data-view {
+  z-index: 1000;
   padding-left:23px;
   padding-right: 23px;
   position: absolute;
@@ -72,6 +84,11 @@
       .watcher-scroll-list{
         height: 100%;
         .item-list{
+          &-none{
+            height: 300px;
+            line-height: 300px;
+            text-align: center;
+          }
         }
       }
     }
@@ -91,6 +108,12 @@
     }
     .goods-scroll{
       height: 828px;
+      .none-goods{
+        text-align: center;
+        font-size: 32px;
+        height:400px;
+        line-height: 400px;
+      }
     }
   }
 
@@ -112,6 +135,9 @@
       left:50%;
       top:0;
       transform: translate(-50%,-50%);
+      .img{
+        width: 100%;
+      }
     }
     &-dec{
       margin-top: 86px;
@@ -198,6 +224,7 @@
         .img{
           width: 30px;
           height: 30px;
+          margin-right: 10px;
         }
       }
     }
@@ -225,6 +252,10 @@
       .room-dec-name{
         line-height: 40px;
         font-size: 30px;
+        max-width: 170px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
       }
       .room-dec-more{
         line-height: 40px;
@@ -257,6 +288,8 @@
     position: relative;
     height:465px;
     &-user{
+      animation:out ;
+      animation-duration: 2s;
       display: inline-block;
       line-height: 44px;
       height: 44px;
@@ -264,6 +297,13 @@
       overflow: hidden;
       position: absolute;
       top:0;
+      .content{
+        .buy-dec{
+          .user-name{
+            margin-right:20px
+          }
+        }
+      }
       .container{
         padding: 0 15px;
         background: #ec5942;
@@ -272,6 +312,11 @@
         height: 100%;
         display: flex;
         flex-direction: row;
+        .buy-dec{
+          .user-name{
+            margin-right:20px
+          }
+        }
         .iconfont{
           font-size: 30px;
         }
@@ -309,6 +354,14 @@
           height: 72px;
           border-radius: 36px;
           position: relative;
+          .img{
+            position: absolute;
+            width:64px;
+            animation: gift;
+            animation-duration: 2s;
+            animation-fill-mode: forwards;
+            animation-timing-function: ease;
+          }
           .container{
             width: 72px;
             height: 72px;
@@ -329,12 +382,21 @@
           .icon-xinaixin{
             color: #e75252;
           }
+          .icon-zhuanfa{
+            display: inline-block;
+            padding: 0;
+            line-height: 1.2;
+            background: rgba(0,0,0,0);
+          }
+          .icon-zhuanfa:after{
+            border: none;
+          }
         }
       }
       .opc{
         position: relative;
         .send-message{
-          width: 360px;
+          width: 400px;
           padding: 0 35px;
           border-radius: 35px;
           height: 70px;
@@ -358,15 +420,16 @@
         }
       }
     }
-     &-message{
+    .message-scroll{
+      height: 100%;
+      overflow: hidden;
       position: relative;
-       top:50px;
+      top:50px;
+      padding-bottom: 60px;
+    }
+     &-message{
        display: flex;
        flex-direction: column;
-       justify-content: flex-end;
-       padding-bottom: 50px;
-       overflow: hidden;
-       height: 100%;
      }
     .message{
       max-width: 690px;

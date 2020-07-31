@@ -78,15 +78,16 @@ export default class MemberIndex extends Component {
 
   componentDidShow () {
     Taro.navigateTo({url:'/others/pages/live/live'})
-    const { colors } = this.props
-    Taro.setNavigationBarColor({
-      backgroundColor: colors.data[0].marketing,
-      frontColor: '#000000'
-    })
-    this.fetch()
-    if(S.getAuthToken()){
-      this.toActiveVip()
-    }
+
+    // const { colors } = this.props
+    // Taro.setNavigationBarColor({
+    //   backgroundColor: colors.data[0].marketing,
+    //   frontColor: '#000000'
+    // })
+    // this.fetch()
+    // if(S.getAuthToken()){
+    //   this.toActiveVip()
+    // }
 
   }
   toActiveVip(){

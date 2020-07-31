@@ -33,6 +33,7 @@ export default class NavGap extends Component{
   }
 
   handleIconClick = () => {
+    console.log('jjjj')
    Taro.navigateBack()
   }
   render(){

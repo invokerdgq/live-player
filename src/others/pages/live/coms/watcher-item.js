@@ -9,28 +9,34 @@ export default class WatcherItem extends Component{
   }
   defaultProps = {
     info:{
-      user_name:'测试'
+      face:'',
+      grade:1,
+      nick:'',
     },
-    rank:1,
+    rank:null,
     giveLike:0
   }
   constructor(props) {
     super(props);
   }
   render() {
-    const {rank,info,giveLike} = this.props
-    let rankIcon
-    switch (info.grade_name) {
-      case '普通会员':
+    const {info,giveLike = 0,rank} = this.props
+    let rankIcon ,grade_name
+    switch (info?info.grade:'') {
+      case '1':
         rankIcon = 'icon-putong';
+        grade_name = '普通会员'
         break
-      case '钻石会员':
+      case '2':
+        grade_name = '钻石会员'
         rankIcon = 'icon-zuanshi';
         break
-      case '至尊会员':
+      case '3':
+        grade_name = '至尊会员'
         rankIcon = 'icon-zhizun';
         break
-      case '王者身份':
+      case '4':
+        grade_name = '王者身份'
         rankIcon = 'icon-wangzhe';
         break
       default :
@@ -43,11 +49,11 @@ export default class WatcherItem extends Component{
             <View className={`watcher-item-rank${rank}`}>{rank}</View>
         }
         <View className='avatar'>
-          <Image mode='widthFix' className='img'/>
+          <Image mode='widthFix' className='img' src={info.face}/>
         </View>
-        <Text className='user-name'>{info.user_name}</Text>
+        <Text className='user-name'>{info.nick}</Text>
         <View className='sign'>
-          <View className={`iconfont ${rankIcon}`}/><Text>{info.grade_name}</Text>
+          <View className={`iconfont ${rankIcon}`}/><Text>{grade_name}</Text>
         </View>
         <View className='like'>{giveLike}</View>
       </View>

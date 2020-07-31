@@ -15,6 +15,12 @@ export function getOnlineRoom(params) {
 export function giveLike(params) {
   return req.post('/live/like',params)
 }
+export function attend(params) {
+  return req.post('/live/subscribe',params)
+}
 export function getUserSig(params) {
   return req.get('/live/usersig',params)
+}
+export function addHistory(params) {
+  return req.post('/live/history/add',params)
 }

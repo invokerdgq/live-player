@@ -22,8 +22,8 @@ export function login (params) {
   const appid = getAppId()
   return req.post('/login', {
     ...params,
-    appid,
-    auth_type: 'wxapp'
+     appid,
+    auth_type: 'wxappsxg'
   }, { showError: false })
 }
 
@@ -33,7 +33,7 @@ export function prelogin (params) {
     return req.post('/prelogin', {
       ...params,
       appid,
-      auth_type: 'wxapp'
+      auth_type: 'wxappsxg'
     })
 }
 

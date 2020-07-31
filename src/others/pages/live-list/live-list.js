@@ -83,23 +83,20 @@ handleSortChange(type){
 handleToRoom(item){
     Taro.navigateToMiniProgram({
        appId:'wxde87f955d769c707',
-       path:`/others/pages/live/live?appId=${item.im_id}&token=${Taro.getStorageSync('auth_token')}`,
+       path:`/others/pages/live/live`,
        extraData:{
         ...item,
-         token:Taro.getStorageSync('auth_token')
+         token:Taro.getStorageSync('auth_token'),
+         owner:0
       },
       envVersion:'develop',
       success(){
          console.log('跳转 苏心购')
-        console.log({
-          ...item,
-          token:Taro.getStorageSync('auth_token')
-        })
       }
     })
 }
   render(){
-    const {query,roomList} = this.state
+    const {query,roomList,sort} = this.state
     return(
       <View className='live'>
         <NavGap title='直播间列表'/>
@@ -111,35 +108,35 @@ handleToRoom(item){
             </View>
             <View className='iconfont icon-camera-aside'/>
           </View>
-          <View className='live-tag'>
-            <View className='live-tag-item' onClick={this.handleSortChange.bind(this,'RANK')}><Image mode='widthFix' className='img' src={`${cdn}/rank.png`}/><Text className='dec'>排行榜</Text></View>
-            <View className='live-tag-item' onClick={this.handleSortChange.bind(this,'CITY')}><Image mode='widthFix' className='img' src={`${cdn}/samecity.png`}/><Text className='dec'>同城</Text></View>
-            <View className='live-tag-item' onClick={this.handleSortChange.bind(this,'ATTEND')}><Image mode='widthFix' className='img' src={`${cdn}/attend.png`}/><Text className='dec'>关注</Text></View>
-            <View className='live-tag-item'><Image mode='widthFix' className='img' src={`${cdn}/mine.png`}/><Text className='dec'>我的</Text></View>
-          </View>
-          <View className='room-list'>
-            <ScrollView
-            className='scroll-room-list'
-            scrollY
-            enableFlex={true}
-            onScrollToLower={this.nextPage}
-            >
-              <View className='room-list-contain'>
 
+            <View className='live-tag'>
+              <View className='live-tag-item' onClick={this.handleSortChange.bind(this,'RANK')}><Image mode='widthFix' className='img' src={`${cdn}/rank.png`}/><Text className='dec'>排行榜</Text></View>
+              <View className='live-tag-item' onClick={this.handleSortChange.bind(this,'CITY')}><Image mode='widthFix' className='img' src={`${cdn}/samecity.png`}/><Text className='dec'>同城</Text></View>
+              <View className='live-tag-item' onClick={this.handleSortChange.bind(this,'ATTEND')}><Image mode='widthFix' className='img' src={`${cdn}/attend.png`}/><Text className='dec'>关注</Text></View>
+              <View className='live-tag-item'><Image mode='widthFix' className='img' src={`${cdn}/mine.png`}/><Text className='dec'>我的</Text></View>
+            </View>
+            <View className='room-list'>
+              <ScrollView
+                className='scroll-room-list'
+                scrollY
+                enableFlex={true}
+                onScrollToLower={this.nextPage}
+              >
+                <View className='room-list-contain'>
                   {
                     roomList.map((item,index) =>{
                       return(
                         <View className='item-container' onClick={this.handleToRoom.bind(this,item)}>
-                        <RoomItem
-                          info={item}
-                        />
+                          <RoomItem
+                            info={item}
+                          />
                         </View>
                       )
                     })
                   }
-              </View>
-            </ScrollView>
-          </View>
+                </View>
+              </ScrollView>
+            </View>
         </View>
       </View>
     )

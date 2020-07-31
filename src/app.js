@@ -39,7 +39,7 @@ if(process.env.TARO_ENV === 'weapp'){
 // }
 if(process.env.TARO_ENV === 'weapp'){
   function isTabBarPage(url){
-    return /\/pages\/(index|category\/index|recommend\/list|cart\/espier-index|member\/index)(.)*/.test(url)
+    return /\/pages\/(index|category\/index|recommend\/list|member\/index)(.)*/.test(url)
   }
   function isTradePage(url) {
     return /\/trade(.)*/.test(url)
@@ -70,29 +70,16 @@ useHooks()
 
   class App extends Component {
     // eslint-disable-next-line react/sort-comp
-   async componentWillMount () {
-      console.log('app    --------------------------------')
-      console.log(this.$router)
-      await entry.entryLaunch(this.$router.params.query)
-     Taro.setStorageSync('auth_token','eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9zeHQtYi5vaW9vcy5jb21cL2FwaVwvaDVhcHBcL3d4YXBwXC90b2tlblwvcmVmcmVzaCIsImlhdCI6MTU5NTc2Mzg0MSwiZXhwIjoxNTk1NzkxNDUyLCJuYmYiOjE1OTU3NzM0NTIsImp0aSI6ImFHSGd0MnhZOEMzT3RzclEiLCJzdWIiOiIzNjIyMzhfZXNwaWVyX29QVnpGNU1ta0xuSmM2Zm5JbGJjRXV0ZEQzOWtfZXNwaWVyX29ZcFJZd2tZQkJFQXk4R211OE95Ul8zLThlNHMiLCJwcnYiOiI5MTVlZjNiMTQ1Nzk3ZDk2MzZlNjY3ODY2MDg5YzZiYjFmZTMyZTFjIiwiaWQiOiIzNjIyMzhfZXNwaWVyX29QVnpGNU1ta0xuSmM2Zm5JbGJjRXV0ZEQzOWtfZXNwaWVyX29ZcFJZd2tZQkJFQXk4R211OE95Ul8zLThlNHMiLCJ1c2VyX2lkIjoiMzYyMjM4IiwiZGlzYWJsZWQiOmZhbHNlLCJjb21wYW55X2lkIjoiMSIsInd4YXBwX2FwcGlkIjoid3g5Mzc4YmNiOTAzYWJkM2FiIiwid29hX2FwcGlkIjoid3g4OTJiMGE4MmZhMDhhMmFjIiwidW5pb25pZCI6Im9ZcFJZd2tZQkJFQXk4R211OE95Ul8zLThlNHMiLCJuaWNrbmFtZSI6Ilx1NjU2M1x1NTE3M1x1NmUwNVx1NmUyZCIsIm1vYmlsZSI6IjE4MzkzODEwNTE1IiwidXNlcm5hbWUiOiIiLCJzZXgiOjAsInVzZXJfY2FyZF9jb2RlIjoiNEFBMDBFM0MwRDgwIiwibWVtYmVyX2NhcmRfY29kZSI6IjRBQTAwRTNDMEQ4MCIsIm9mZmxpbmVfY2FyZF9jb2RlIjoiIiwib3BlcmF0b3JfdHlwZSI6InVzZXIifQ.9Cp7ZSW8kg1poiCOr8VicCS4R7v3J75eOhEyEwsn_Xc')
-      // let menuButtonObject = Taro.getMenuButtonBoundingClientRect();
-      // Taro.getSystemInfo({
-      //   success: res => {
-      //     let statusBarHeight = res.statusBarHeight;
-      //     let navTop = menuButtonObject.top;
-      //     let Height = statusBarHeight + menuButtonObject.height + (menuButtonObject.top - statusBarHeight)*2;
-      //     this.navHeight = Height;
-      //     this.navTop = navTop;
-      //     this.windowHeight = res.windowHeight;
-      //     Taro.setStorageSync('top',(this.navHeight - statusBarHeight)/2 + statusBarHeight)
-      //   },
-      //   fail(err) {
-      //     console.log(err);
-      //   }
-      // })
+    componentWillMount () {
+      console.log('jjjjjj')
+      console.log(this.$router.params)
+       entry.entryLaunch(this.$router.params.query)
     }
 
     componentDidMount () {
+     Taro.setKeepScreenOn({
+       keepScreenOn: true
+     })
       const promoterExp = Taro.getStorageSync('distribution_shop_exp')
       if (Date.parse(new Date()) - promoterExp > 86400000 * 3) {
         Taro.setStorageSync('distribution_shop_id', '')
@@ -118,39 +105,39 @@ useHooks()
         navigationStyle: "custom"
       },
       pages: [
+        'pages/member/blank',
         // 'pages/index',
         // 'pages/goodsdetail',
         // 'pages/home/landing',
         // 'pages/category/index',
         // 'pages/item/list',
-        // 'pages/item/espier-detail',
+        'pages/item/espier-detail',
         // 'pages/item/item-params',
         // 'pages/item/package-list',
         // 'pages/item/group-list',
         // 'pages/item/group-detail',
         // 'pages/item/seckill-list',
         // 'pages/item/seckill-goods-list',
-        // 'pages/home/coupon-home',
-        //
-        // 'pages/cart/espier-index',
-        // 'pages/cart/espier-checkout',
-        // 'pages/cart/coupon-picker',
+        'pages/home/coupon-home',
+        'pages/cart/espier-index',
+        'pages/cart/espier-checkout',
+        'pages/cart/coupon-picker',
         // 'pages/article/index',
         //
         // 'pages/recommend/list',
         // 'pages/recommend/detail',
-        //
-        // 'pages/auth/reg',
-        // 'pages/auth/reg-rule',
-        // 'pages/auth/login',
-        // 'pages/auth/forgotpwd',
-        // 'pages/auth/wxauth',
-        // 'pages/auth/pclogin',
-        //
+
+        'pages/auth/reg',
+        'pages/auth/reg-rule',
+        'pages/auth/login',
+        'pages/auth/forgotpwd',
+        'pages/auth/wxauth',
+        'pages/auth/pclogin',
+
         // 'pages/cashier/index',
         // 'pages/cashier/cashier-result',
-
-        'pages/member/index',
+        //
+        // 'pages/member/index',
         // 'pages/member/pay',
         // 'pages/member/pay-rule',
         // 'pages/member/coupon',
@@ -183,61 +170,62 @@ useHooks()
 
       ],
       subpackages: [
-        // {
-        //   root: 'marketing',
-        //   pages: [
-        //     'pages/trade/list',
-        //     'pages/trade/customer-pickup-list',
-        //     'pages/trade/drug-list',
-        //     'pages/trade/detail',
-        //     'pages/trade/delivery-info',
-        //     'pages/trade/rate',
-        //     'pages/trade/cancel',
-        //     'pages/trade/after-sale',
-        //     'pages/trade/refund',
-        //     'pages/trade/refund-detail',
-        //     'pages/trade/refund-sendback',
-        //     'pages/trade/invoice-list',
-        //
-        //     'pages/distribution/index',
-        //     'pages/distribution/setting',
-        //     'pages/distribution/statistics',
-        //     'pages/distribution/trade',
-        //     'pages/distribution/subordinate',
-        //     'pages/distribution/withdraw',
-        //     'pages/distribution/withdrawals-record',
-        //     'pages/distribution/withdrawals-acount',
-        //     'pages/distribution/goods',
-        //     'pages/distribution/shop',
-        //     'pages/distribution/shop-setting',
-        //     'pages/distribution/shop-form',
-        //     'pages/distribution/qrcode',
-        //     'pages/distribution/shop-goods',
-        //     'pages/distribution/shop-category',
-        //     'pages/distribution/shop-trade',
-        //     'pages/distribution/shop-achievement',
-        //
-        //     'pages/reservation/brand-list',
-        //     'pages/reservation/brand-detail',
-        //     'pages/reservation/brand-result',
-        //     'pages/reservation/reservation-list',
-        //     'pages/reservation/goods-reservate',
-        //     'pages/reservation/reservation-detail',
-        //
-        //     'pages/member/item-activity',
-        //     'pages/member/activity-detail',
-        //     'pages/member/user-info',
-        //     'pages/item/espier-evaluation',
-        //     'pages/item/rate',
-        //     'pages/item/success',
-        //
-        //     'pages/wheel/index'
-        //   ]
-        // },
+        {
+          root: 'marketing',
+          pages: [
+            'pages/trade/list',
+            'pages/trade/customer-pickup-list',
+            'pages/trade/drug-list',
+            'pages/trade/detail',
+            'pages/trade/delivery-info',
+            'pages/trade/rate',
+            'pages/trade/cancel',
+            'pages/trade/after-sale',
+            'pages/trade/refund',
+            'pages/trade/refund-detail',
+            'pages/trade/refund-sendback',
+            'pages/trade/invoice-list',
+
+            // 'pages/distribution/index',
+            // 'pages/distribution/setting',
+            // 'pages/distribution/statistics',
+            // 'pages/distribution/trade',
+            // 'pages/distribution/subordinate',
+            // 'pages/distribution/withdraw',
+            // 'pages/distribution/withdrawals-record',
+            // 'pages/distribution/withdrawals-acount',
+            // 'pages/distribution/goods',
+            // 'pages/distribution/shop',
+            // 'pages/distribution/shop-setting',
+            // 'pages/distribution/shop-form',
+            // 'pages/distribution/qrcode',
+            // 'pages/distribution/shop-goods',
+            // 'pages/distribution/shop-category',
+            // 'pages/distribution/shop-trade',
+            // 'pages/distribution/shop-achievement',
+            //
+            // 'pages/reservation/brand-list',
+            // 'pages/reservation/brand-detail',
+            // 'pages/reservation/brand-result',
+            // 'pages/reservation/reservation-list',
+            // 'pages/reservation/goods-reservate',
+            // 'pages/reservation/reservation-detail',
+            //
+            // 'pages/member/item-activity',
+            // 'pages/member/activity-detail',
+            // 'pages/member/user-info',
+            // 'pages/item/espier-evaluation',
+            // 'pages/item/rate',
+            // 'pages/item/success',
+            //
+            // 'pages/wheel/index'
+          ]
+        },
         {
           root: 'others',
           pages: [
             'pages/live/live',
+            'pages/live/store',
             // 'pages/home/license',
             // 'pages/protocol/privacy',
             // 'pages/exchange/exchange',
@@ -270,8 +258,6 @@ useHooks()
       ]
     }
     componentDidShow (options) {
-      console.log('++++++++++++++++++++++++++++ --------------------------------')
-      console.log(this.$router.params)
       if (process.env.TARO_ENV === 'weapp') {
         FormIds.startCollectingFormIds()
         if (S.getAuthToken()) {
@@ -291,8 +277,10 @@ useHooks()
 
       const { referrerInfo } = this.$router.params || {}
       if (referrerInfo) {
-        console.log(referrerInfo)
         Taro.setStorageSync('extraData',referrerInfo.extraData)
+        if(referrerInfo.extraData){
+          Taro.setStorageSync('is_share',false)
+        }
       }
     }
 

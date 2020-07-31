@@ -23,7 +23,6 @@ export default class WxAuth extends Component {
   }
 
   async autoLogin () {
-    console.log('shouquan-0------')
     const { update } = this.$router.params
     const { code } = await Taro.login()
     try {
@@ -116,6 +115,39 @@ export default class WxAuth extends Component {
     }
 
     const { code } = await Taro.login()
+   const {token} = await api.wx.login({ code,
+      iv,
+      encryptedData,
+      rawData,
+      signature,
+      userInfo})
+    if(token){
+      S.setAuthToken(token)
+      return Taro.navigateTo({
+        url:'/others/pages/live/live'
+      })
+    }else{
+      Taro.showModal({
+        title:'前往苏心淘注册',
+        success:(res) => {
+          if(res.confirm){
+             Taro.navigateBackMiniProgram({
+              appId:'wx9378bcb903abd3ab',
+              path:`/pages/auth/wxauth`,
+              extraData:{
+                register:true
+              },
+              envVersion:'develop',
+              success(){
+                console.log('跳转 苏心淘')
+              }
+            })
+          }else{
+
+          }
+        }
+      })
+    }
 
     Taro.showLoading({
       mask: true,
@@ -163,10 +195,13 @@ export default class WxAuth extends Component {
         return
       }
 
-      // 跳转注册绑定
-      Taro.redirectTo({
-        url: `/pages/auth/reg?code=${code}&open_id=${open_id}&union_id=${union_id}`
-      })
+     // // 跳转注册绑定
+     //  Taro.redirectTo({
+     //    url: `/pages/auth/reg?code=${code}&open_id=${open_id}&union_id=${union_id}`
+     //  })
+      // Taro.navigateBackMiniProgram({
+      //
+      // })
     } catch (e) {
       console.info(e)
       Taro.showToast({

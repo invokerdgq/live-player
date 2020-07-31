@@ -21,6 +21,7 @@ export default class GoodsBuyPanel extends Component {
   }
 
   static defaultProps = {
+    room_id:'',
     level:'',
     assist_id:'',
     info: null,
@@ -291,7 +292,8 @@ export default class GoodsBuyPanel extends Component {
           item_id,
           num,
           distributor_id,
-          shop_type: isDrug ? 'drug' : 'distributor'
+          shop_type: isDrug ? 'drug' : 'distributor',
+          reference:this.props.room_id
 				})
 				Taro.showToast({
 					title: '成功加入购物车',
@@ -329,7 +331,8 @@ export default class GoodsBuyPanel extends Component {
       try {
         await api.cart.fastBuy({
           item_id,
-          num
+          num,
+          reference:this.props.room_id
         })
       } catch (e) {
        Taro.showToast({

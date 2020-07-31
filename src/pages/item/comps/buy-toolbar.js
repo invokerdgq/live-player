@@ -26,7 +26,7 @@ export default class GoodsBuyToolbar extends Component {
   }
 
   handleClickCart = (id, type) => {
-    Taro.reLaunch({
+    Taro.navigateTo({
       url: `/pages/cart/espier-index?type=${type}`
     })
   }

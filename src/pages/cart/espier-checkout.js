@@ -365,7 +365,8 @@ export default class CartCheckout extends Component {
       member_discount: 0,
       coupon_discount: 0,
 			pay_type: payType,
-			distributor_id: shop_id === 'undefined' ? 0 : shop_id
+			distributor_id: shop_id === 'undefined' ? 0 : shop_id,
+      appId:Taro.getExtConfigSync().appid
     }
 
     log.debug('[checkout] params: ', params)
@@ -823,6 +824,7 @@ handleExchange = async () => {
     }
 
     payErr = null
+
     Taro.M(config)
     try {
       const payRes = await Taro.requestPayment(config)
@@ -856,9 +858,12 @@ handleExchange = async () => {
       })*/
     } else {
       if (payErr.errMsg.indexOf('fail cancel') >= 0) {
-        Taro.redirectTo({
-          url: `/pages/trade/detail?id=${order_id}`
-        })
+        setTimeout(() => {
+          Taro.redirectTo({
+            // url: `/pages/trade/detail?id=${order_id}`
+            url:'/others/pages/live/live'
+          })
+        },1500)
       }
     }
     return
