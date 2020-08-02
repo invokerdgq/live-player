@@ -1,0 +1,23 @@
+@import "../../style/imports";
+
+page{
+  background: white;
+}
+.blank{
+  width: 100vw;
+  height: 100vh;
+  .to-kefu{
+    background: $color-theme;
+    color: white;
+    font-size: 32px;
+    height: 70px;
+    line-height: 70px;
+    border-radius: 35px;
+    padding: 0 40px;
+    position: absolute;
+    left:50%;
+    top:50%;
+    transform: translate(-50%,-50%);
+    white-space: nowrap;
+  }
+}

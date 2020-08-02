@@ -12,15 +12,15 @@ export default class WatcherItem extends Component{
       face:'',
       grade:1,
       nick:'',
+      like:''
     },
-    rank:null,
-    giveLike:0
+    rank:'',
   }
   constructor(props) {
     super(props);
   }
   render() {
-    const {info,giveLike = 0,rank} = this.props
+    const {info,rank} = this.props
     let rankIcon ,grade_name
     switch (info?info.grade:'') {
       case '1':
@@ -45,7 +45,7 @@ export default class WatcherItem extends Component{
     return(
       <View className='watcher-item'>
         {
-          rank&&
+          rank != ''&&
             <View className={`watcher-item-rank${rank}`}>{rank}</View>
         }
         <View className='avatar'>
@@ -55,7 +55,7 @@ export default class WatcherItem extends Component{
         <View className='sign'>
           <View className={`iconfont ${rankIcon}`}/><Text>{grade_name}</Text>
         </View>
-        <View className='like'>{giveLike}</View>
+        <View className='like'>{info.like}</View>
       </View>
     )
   }

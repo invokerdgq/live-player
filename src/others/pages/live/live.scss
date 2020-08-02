@@ -11,24 +11,40 @@
   100%   {opacity: 0}
 }
 
-.icon-arrow-left{
+.back{
+  z-index:1000;
   position: absolute;
   left:0;
+  transform: translate(0,-50%);
+}
+.icon-arrow-left{
   width: 87px;
   height: 64px;
   line-height: 64px;
   margin-left: 10px;
   font-size: 52px;
-  transform: translate(0,-50%);
-  z-index:100
+}
+.outline-live{
+  height: 70px;
+  line-height: 70px;
+  border-radius: 35px;
+  padding: 0 35px;
+  background: $color-theme;
+  color: white;
+  font-size: 32px;
+  position: absolute;
+  left:50%;
+  top:50%;
+  transform: translate(-50%,-50%);
 }
 .live{
   width: 100vw;
   height: 100vh;
   background: white;
+  z-index: 10;
 }
 .data-view {
-  z-index: 1000;
+  z-index: 100;
   padding-left:23px;
   padding-right: 23px;
   position: absolute;
@@ -51,13 +67,13 @@
     &-title{
       display: flex;
       flex-direction: row;
-      justify-content: center;
+      justify-content: space-around;
       height: 88px;
       line-height: 88px;
       .change-type-com{
-        margin-right: 138px;
+        //margin-right: 138px;
       }
-      .change-type-com,.change-type-line{
+      .change-type-com,.change-type-line,.change-type-fans{
         font-size: 32px;
         color: #A1A1A1;
       }
@@ -289,7 +305,9 @@
     height:465px;
     &-user{
       animation:out ;
-      animation-duration: 2s;
+      animation-duration: 3s;
+      animation-delay: 2s;
+      animation-fill-mode: forwards;
       display: inline-block;
       line-height: 44px;
       height: 44px;
@@ -422,14 +440,18 @@
     }
     .message-scroll{
       height: 100%;
-      overflow: hidden;
+      overflow: auto;
       position: relative;
       top:50px;
       padding-bottom: 60px;
+      //display: flex;
+      //flex-direction: column;
+      //justify-content: flex-end;
     }
      &-message{
-       display: flex;
-       flex-direction: column;
+       //display: flex;
+       //flex-direction: column;
+       //justify-content: flex-end;
      }
     .message{
       max-width: 690px;

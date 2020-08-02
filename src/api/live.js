@@ -24,3 +24,15 @@ export function getUserSig(params) {
 export function addHistory(params) {
   return req.post('/live/history/add',params)
 }
+export function getFansList() {
+  return req.get('/live/subscribe/list')
+}
+export function changeLiverStatus(params) {
+  return req.get('/live/send/heartbeat',params)
+}
+export function getRoomFans(params) {
+  return req.get('/live/fans/list',params)
+}
+export function getRankList(params) {
+  return req.get('/live/like/list',params)
+}

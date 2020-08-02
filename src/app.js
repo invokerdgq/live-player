@@ -279,7 +279,9 @@ useHooks()
       if (referrerInfo) {
         Taro.setStorageSync('extraData',referrerInfo.extraData)
         if(referrerInfo.extraData){
-          Taro.setStorageSync('is_share',false)
+         if(referrerInfo.extraData.im_id){
+           Taro.setStorageSync('im_id',referrerInfo.extraData.im_id)
+         }
         }
       }
     }

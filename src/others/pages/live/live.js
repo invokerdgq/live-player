@@ -14,6 +14,7 @@ import entry from "../../../utils/entry";
 import TLS from './tls.min'
 import TIM from './tim-wx'
 import {Loading} from "../../../components";
+import OwnerModal from './coms/own-modal'
 
 let tls
 
@@ -29,6 +30,8 @@ export default class Live extends Component{
     super(props);
     this.state = {
       ...this.state,
+      timerLiver:null,
+      showExitChoose:false,
       onlineNum:0,
       im_id:'',
       is_share:false,
@@ -53,41 +56,54 @@ export default class Live extends Component{
       timer:null,
       pullStreamLink:'',
       pushStreamLink:'',
-      room_status:1,
+      room_status:true,
+      liverStatus:'',
       type:'',
       inputMessage:'',
       msgList:[],
       watcherList:[],
       onlineList:[],
+      fansList:[],
       goodsList:[],
       watcherType:'line'
 
     }
     this.top = Taro.getStorageSync('top')
   }
-componentDidShow() {
-    console.log('show-==-=-=-=-=-=-=-=-=-=-')
-  console.log(this.$router.params)
-}
 
   componentDidMount() {
+   Taro.setKeepScreenOn({
+      keepScreenOn: true
+    })
     entry.entryLaunch(this.$router.params)
     const  extraData  = Taro.getStorageSync('extraData')
     const im_id = Taro.getStorageSync('im_id')
-    const is_share = Taro.getStorageSync('is_share')
       this.setState({
-        is_share:is_share,
-        im_id:is_share?im_id:extraData.im_id
+        im_id:im_id,
+        owner:extraData?extraData.owner:0
       },() => {
         this.randomGift()
         this.initTim()
-        this.nextPage()
       })
   }
-
-   componentWillUnmount(){
+ componentDidShow(){
+    if(this.state.owner == 1){
+      tls.sendCustomMsgAndEmitEvent(TLS.EVENT.ROOM_STATUS_CHANGE,'ON')
+    }
+ }
+  componentWillUnmount(){
+    clearInterval(this.state.timer)
+    clearInterval(this.state.timerLiver)
     this.statusSend('off')
-     tls.exitRoom()
+    if(this.state.owner){
+      tls.sendCustomMsgAndEmitEvent(TLS.EVENT.ROOM_STATUS_CHANGE,'END')
+    }
+    tls.exitRoom()
+  }
+  componentDidHide(){
+    if(this.state.owner ==1){
+      tls.sendCustomMsgAndEmitEvent(TLS.EVENT.ROOM_STATUS_CHANGE,'PAUSE')
+    }
   }
 
   postUserInfo = async ()=>{
@@ -117,20 +133,30 @@ initTim = async  () => {
   }
   await this.postUserInfo()
   const extraData = Taro.getStorageSync('extraData')
-  const {is_share} = this.state
-  const {user_id = 1,userSig,url,products,is_subscribe,room_live_link,room_status} = await api.live.getUserSig({owner:this.state.is_share?0:1,room_id:this.state.im_id})
+  const {user_id = 1,userSig,url,products,is_subscribe,room_live_link,room_status} = await api.live.getUserSig({owner:this.state.owner,room_id:this.state.im_id})
+  let list
+  try{
+    let newList =  JSON.parse(products)
+   if( Array.isArray(newList)){
+     list = newList
+   }else {
+     list = []
+   }
+  }catch (e) {
+    list = []
+  }
   this.setState({
     pullStreamLink:room_live_link,
     pushStreamLink:url,
-    room_status:is_share?room_status!=0:1,
+    room_status:extraData.owner == 1?true:room_status!=0,
     // room_cover:extraData.room_cover,
-    is_subscribe:is_share?is_subscribe !=0:1,
-    devicePosition: is_share?'':extraData.devicePosition,
-    beautify:is_share?'':extraData.beautify,
-    filter:is_share?'':extraData.filter,
-    goodsList:products == ''?[]:JSON.parse(products)
+    is_subscribe:extraData.owner != 1?is_subscribe !=0:1,
+    devicePosition: extraData.devicePosition || '',
+    beautify:extraData.beautify || '',
+    filter:extraData.filter || '',
+    goodsList:list
   })
-  if(is_share){
+  if(extraData.owner != 1){
     api.live.addHistory({
       room_id:this.state.im_id,
       source:Taro.getStorageSync('distribution_shop_id')
@@ -158,7 +184,7 @@ initTim = async  () => {
     if(this.state.ownerInfo) return
     try {
       let {groupInfo, userInfo} = await tls.joinRoom({
-        roomID: this.state.im_id,  //   主播登录时需要传入
+        roomID: this.state.im_id,
         getOwnerInfo:true
       })
       // 已经在房间中 再次进入 拿不到groupInfo
@@ -166,6 +192,11 @@ initTim = async  () => {
         groupInfo = await tls.getRoomInfo()
       }
       this.nextPage()
+      if(this.state.owner == 1)
+      {
+        this.liverStatusSend()
+        tls.sendCustomMsgAndEmitEvent(TLS.EVENT.ROOM_STATUS_CHANGE,'ON')
+      }
       this.statusSend('on')
       this.setState({
         userInfo,
@@ -181,22 +212,32 @@ initTim = async  () => {
 }
 
 onShareAppMessage(obj) {
-    console.log('llllllllLLLLLLLLLLLLL')
-  console.log(this.state.im_id)
     return{
       title:'快来观看直播吧~',
-      path:`/others/pages/live/live?im_id=${this.state.im_id}&uid=${this.state.memberInfo.user_card_code}&is_share=${true}`
+      path:`/others/pages/live/live?im_id=${this.state.im_id}&uid=${this.state.memberInfo.user_card_code}`
     }
 }
 
   randomGift = ()=>{
     let index = Math.floor(Math.random()*(this.state.giftList.length-1))
-  console.log(index)
   this.setState({
     current:this.state.giftList[index]
   })
 }
-
+liverStatusSend(){
+  let interval =  () =>{
+    try{
+      api.live.changeLiverStatus({room_id:this.state.im_id})
+    }catch (e) {
+      console.log(e)
+    }
+  }
+  interval()
+  let timerLiver = setInterval(interval,1000*60)
+  this.setState({
+    timerLiver
+  })
+}
 statusSend(type){
   let interval =  () =>{
            try{
@@ -222,8 +263,51 @@ statusSend(type){
 }
 
 initMintor() {
-  //有人加群
   let formate = this.formate
+  // 测试时间
+  tls.on(TLS.EVENT.ROOM_STATUS_CHANGE,async (res) => {
+    console.log(res)
+  })
+    //房间状态发生改变 -----------------------------------------------
+  tls.on(TLS.EVENT.ROOM_STATUS_CHANGE, async(data) => {
+    console.log('kkkkkkkkkkkkkkkkkkkkkkkkkkk')
+    console.log(data)
+    let msg = this.handleMsgLength()
+    switch (data.value) {
+      case 'ON':
+        msg.push({
+          user_name: `主播 ${this.state.ownerInfo.nick}`,
+          user_message: '加入了群聊',
+          // id: `id${Date.now()}`
+        })
+        this.setState({
+          msgList: msg,
+          liverStatus: 'ON'
+        })
+        break
+      case 'PAUSE':
+        msg.push({
+          user_name: `主播 ${this.state.ownerInfo.nick}`,
+          user_message: '暂时离开',
+        })
+        this.setState({
+          msgList: msg,
+          liverStatus: 'PAUSE'
+        })
+        break
+      default :
+        msg.push({
+          user_name: `主播 ${this.state.ownerInfo.nick}`,
+          user_message: '已下线',
+          // id: `id${Date.now()}`
+        })
+        this.setState({
+          msgList: msg,
+          liverStatus: 'END'
+        })
+    }
+    })
+  //有人加群-----------------------------------------------
   tls.on(TLS.EVENT.JOIN_GROUP, async (data) => {
     console.log('已经加入了群聊', Math.random())
     let msg = this.handleMsgLength()
@@ -239,7 +323,7 @@ initMintor() {
     // const res = api.
   })
 
-  //有人退群
+  //有人退群-----------------------------------------------
   tls.on(TLS.EVENT.EXIT_GROUP, async (data) => {
     let msg = this.handleMsgLength()
     msg.push({
@@ -253,14 +337,14 @@ initMintor() {
     })
   })
 
-  //有人购买东西
+  //有人购买东西---------------------------------------------
   tls.on(TLS.EVENT.BUY_GOODS,async (data) => {
     const {nick,avatar,value,userID} = data
     this.setState({
       buyerNick:nick
     })
   })
-  //有人发消息
+  //有人发消息-----------------------------------------------
   tls.on(TLS.EVENT.MESSAGE, async(data) => {
     let msg = this.handleMsgLength()
     msg.push({
@@ -273,21 +357,21 @@ initMintor() {
     })
   })
 
-  //有人给主播点赞
-  // tls.on(TLS.EVENT.LIKE, async(data) => {
-  //   let msg = this.handleMsgLength()
-  //   msg.push({
-  //     user_name: formate(data.nick),
-  //     user_message: '给主播点赞了',
-  //     // id: `id${Date.now()}`
-  //   })
-  //   this.setState({
-  //     msgList: msg,
-  //     likes:Number(this.state.likes) +1
-  //   })
-  // })
+  //有人给主播点赞-----------------------------------------------
+  tls.on(TLS.EVENT.LIKE, async(data) => {
+    let msg = this.handleMsgLength()
+    msg.push({
+      user_name: formate(data.nick),
+      user_message: '给主播点赞了',
+      // id: `id${Date.now()}`
+    })
+    this.setState({
+      // msgList: msg,
+      likes:Number(this.state.likes) +1
+    })
+  })
 
-  //有人关注了主播
+  //有人关注了主播-----------------------------------------------
   tls.on(TLS.EVENT.ATTENTION, async(data) => {
     let msg = this.handleMsgLength()
     msg.push({
@@ -302,7 +386,7 @@ initMintor() {
     const a = await tls.getUserInfo()
   })
 
-  //取消关注
+  //取消关注-----------------------------------------------
   tls.on(TLS.EVENT.CANCELATTENTION, async(data) => {
     let msg = this.handleMsgLength()
     msg.push({
@@ -333,7 +417,7 @@ handleMsgLength(){
     return `${name}${add?' :':''}`
   }
 
-handleSendMessage =(e) =>{
+handleSendMessage = async(e) =>{
     tls.sendMessage(e.detail.value).then((res) => {
      console.log(res)
         let msg = this.handleMsgLength();
@@ -350,7 +434,6 @@ handleSendMessage =(e) =>{
 }
 
   fetch = async (params)=>{
-    console.log('page  change ---------------')
     const  extraData  = Taro.getStorageSync('extraData')
     const {page_no,page_size} = params
     if(this.state.watcherType === 'com'){
@@ -362,17 +445,16 @@ handleSendMessage =(e) =>{
       this.setState({
         loading:true
       })
-      const {list,total_count} = await api.live.getOnlineRoom(option)
+      const {list,total_count} = await api.live.getRankList(option)
       this.setState({
         loading:false
       })
       let total = total_count
       this.setState({
         watcherList:[...this.state.watcherList,...list],
-        onlineNum:total
       })
       return {total}
-    }else{
+    }else if(this.state.watcherType === 'line'){
       const option = {
         page:page_no,
         pageSize:page_size,
@@ -393,13 +475,34 @@ handleSendMessage =(e) =>{
         console.log(this.state)
       })
       return {total}
+    }else{
+      const option = {
+        page:page_no,
+        pageSize:page_size,
+        room_id:this.state.im_id
+      }
+      this.setState({
+        loading:true
+      })
+      const {list,total_count} = await api.live.getRoomFans(option)
+      this.setState({
+        loading:false
+      })
+      let total = total_count
+      this.setState({
+        fansList:[...this.state.fansList,...list],
+        fans:total
+      },() => {
+        console.log(this.state)
+      })
+      return {total}
     }
   }
 
   clickBack(){
     Taro.navigateBackMiniProgram()
   }
-  showMoreDec(type,e){
+  showMoreDec(type,pType,e){
     this.setState({
       type:type
     })
@@ -407,7 +510,8 @@ handleSendMessage =(e) =>{
       this.nextPage()
       tls.sendCustomMsgAndEmitEvent(TLS.EVENT.BUY_GOODS,'BUY')
     }
-    e.stopPropagation()
+    this.changeWatcher(pType)
+    if(e)e.stopPropagation()
   }
   showData(){
     if(this.state.type !== ''){
@@ -425,12 +529,14 @@ handleSendMessage =(e) =>{
     },() => {
       if(type === 'com'){
         this.state.watcherList = []
-      }else{
+      }else if(type === 'line'){
         this.state.onlineList = []
+      }else{
+        this.state.fansList = []
       }
       this.resetPage(() => { this.nextPage()})
     })
-    e.stopPropagation()
+    if(e)e.stopPropagation()
   }
 
  async clickBtn(type){
@@ -459,21 +565,20 @@ handleSendMessage =(e) =>{
             this.setState({
               is_subscribe:!this.state.is_subscribe
             })
+            Taro.hideLoading()
+            Taro.showToast({title:`取消关注成功`})
           })
-          Taro.showToast({title:`取消关注成功`})
-          Taro.hideLoading()
-          return
+        }else{
+          Taro.showLoading({title:'处理中',mask:true})
+          tls.attention().then(async (data) => {
+            const res = await api.live.attend({room_id:this.state.im_id})
+            this.setState({
+              is_subscribe:!this.state.is_subscribe
+            })
+            // Taro.showToast({title:`关注成功`})
+            Taro.hideLoading()
+          })
         }
-        tls.attention().then(async (data) => {
-          const res = await api.live.attend({room_id:this.state.im_id})
-          this.setState({
-            is_subscribe:!this.state.is_subscribe
-          })
-          Taro.showToast({title:`关注成功`})
-          Taro.hideLoading()
-        }).catch(() => {
-          Taro.hideLoading()
-        })
         break
       default :
         Taro.showToast({
@@ -512,25 +617,67 @@ handleSendMessage =(e) =>{
      url: `/pages/item/espier-detail?id=${item.item_id}&room_id=${this.state.im_id}`
     })
   }
+  handleEnd(){
+    this.setState({
+      buyerNick:''
+    })
+  }
+  async comfireExit(){
+   this.setState({
+     showExitChoose:true
+   })
+  }
+  handleOwnCancel(){
+    console.log('cancel------------------------------')
+    this.setState({
+      showExitChoose:false
+    })
+  }
+  handleOwnConfirm(){
+    if(this.state.owner == '1'){
+      this.statusSend('off')
+      tls.exitRoom()
+      tls.sendCustomMsgAndEmitEvent(TLS.EVENT.ROOM_STATUS_CHANGE,'END')
+    }else{
+      this.statusSend('off')
+      tls.exitRoom()
+    }
+  }
   render() {
-    const {onlineNum,buyerNick,showGift,current,is_subscribe,loading,room_cover,fans,likes,groupInfo,ownerInfo,type,msgList,watcherList,onlineList,watcherType,goodsList,pullStreamLink,pushStreamLink,room_status,inputMessage} = this.state
+    const {liverStatus,showExitChoose,backType,fansList,onlineNum,buyerNick,showGift,current,is_subscribe,loading,room_cover,fans,likes,groupInfo,ownerInfo,type,msgList,watcherList,onlineList,watcherType,goodsList,pullStreamLink,pushStreamLink,room_status,inputMessage} = this.state
     let newList
+    let len = this.state.msgList.length
     if(watcherType === 'com'){
       newList = watcherList
-    }else{
+    }else if(watcherType === 'line'){
       newList = onlineList
+    }else{
+      newList = fansList
     }
 
     return(
       <View>
-         <View className='iconfont icon-arrow-left' style={{top:this.top+'px'}} onClick={this.clickBack}/>
-         {/*<View className='live-view'>*/}
-         {/*  {*/}
-         {/*    pushStreamLink !== ''?*/}
-         {/*      <LivePusher className='live' autopush={true} url={pushStreamLink} beauty={this.state.beauty} filter={this.state.filter} devicePosition={this.state.devicePosition}/>:*/}
-         {/*      <LivePlayer className='live' src={pullStreamLink} autoplay={true} objectFit='fillCrop'/>*/}
-         {/*  }*/}
-         {/*</View>*/}
+        <OwnerModal
+        title={`确认${this.state.owner == 1?'关闭直播间':'退出直播间'}`}
+        isShown={showExitChoose}
+        ownCancel={this.handleOwnCancel.bind(this)}
+        ownConfirm={this.handleOwnConfirm.bind(this)}
+        />
+        <View onClick={this.comfireExit.bind(this)} className='back' style={{top:this.top+'px'}}  openType='exit' target='miniProgram'><View className='iconfont icon-arrow-left'/></View>
+         <View className='live-view'>
+           {
+             pushStreamLink !== ''?
+               <LivePusher className='live' autopush={true} url={pushStreamLink} beauty={this.state.beautify} filter={this.state.filter} devicePosition={this.state.devicePosition}/>:
+               room_status == 1?
+                liverStatus === 'ON'?
+               <LivePlayer className='live' src={pullStreamLink} autoplay={true} objectFit='fillCrop'/>:
+               liverStatus === 'PAUSE'?
+                 <View className='outline-live'>主播暂时离开</View>:
+                 <View className='outline-live'>主播已下线</View>:
+                 <View className='outline-live'>主播还未开播</View>
+
+           }
+         </View>
         <View className='data-view' onClick={this.showData.bind(this)}>
           <View className='live-header' style={{top:this.top +'px'}}>
              <View className='live-header-top'>
@@ -542,7 +689,7 @@ handleSendMessage =(e) =>{
                      <View className='room-dec'>
                        <View className='room-dec-name' onClick={this.showMoreDec.bind(this,'live-detail')}><Text>{groupInfo.name}</Text></View>
                        <View className='room-dec-more'>
-                         <Text>{fans||0}关注</Text> | <Text onClick={this.showMoreDec.bind(this,'watcher-detail')}>{onlineNum}在线</Text>
+                         <Text onClick={this.showMoreDec.bind(this,'watcher-detail','fans')}>{fans||0}关注</Text> | <Text onClick={this.showMoreDec.bind(this,'watcher-detail','line')}>{onlineNum}在线</Text>
                        </View>
                      </View>
                      <View className='attend' onClick={this.clickBtn.bind(this,'attend')}>
@@ -560,7 +707,7 @@ handleSendMessage =(e) =>{
                      <View className='room-dec'>
                        <View className='room-dec-name' onClick={this.showMoreDec.bind(this)}><Text>{groupInfo.name}</Text></View>
                        <View className='room-dec-more'>
-                         <Text>{fans||0}关注</Text> | <Text>{onlineNum}在线</Text>
+                         <Text onClick={this.showMoreDec.bind(this,'watcher-detail','fans')}>{fans||0}关注</Text> | <Text onClick={this.showMoreDec.bind(this,'watcher-detail','line')}>{onlineNum}在线</Text>
                        </View>
                      </View>
                      <View className='attend'>
@@ -597,7 +744,7 @@ handleSendMessage =(e) =>{
             <View className='live-footer-container'>
               <View className='live-footer'>
                 { buyerNick != ''&&
-                  <View className='live-footer-user' onClick={this.clickBtn.bind(this,'buy')} >
+                  <View className='live-footer-user' onClick={this.clickBtn.bind(this,'buy')} onAnimationEnd={this.handleEnd.bind(this)} >
                     <View className='container'>
                       <View className='iconfont icon-gouwucheman'/>
                       <Text className='buy-dec'><Text className='user-name'>{buyerNick}</Text>正在去购买</Text>
@@ -610,23 +757,26 @@ handleSendMessage =(e) =>{
                 }
                 <ScrollView
                 scrollY
+                scrollIntoView={`msg${len}`}
                 enableFlex={true}
                 className='message-scroll'
                 >
-                  <View className='live-footer-message'>
+                  {/*<View className='live-footer-message'>*/}
                     {
                       msgList.reverse().map((item,index) => {
                         return (
-                          <OwnOpacity
-                            containerClass={'message'}
-                            renderTrue={<View className={`true ${index === 0?'gradient-bg':''}`}>
-                              <Text className={`user_name ${index === 0?'gradient-name':''}`}>{item.user_name}</Text><Text className={`user_message ${index === 0?'gradient-ms':''}`}>{item.user_message}</Text></View>}
-                            renderHide={<View className='true'><Text className='user_name'>{item.user_name}:</Text><Text className='user_message'>{item.user_message}</Text></View>}>
-                          </OwnOpacity>
+                          <View id={'msg' +(index +1)}>
+                            <OwnOpacity
+                              containerClass={'message'}
+                              renderTrue={<View className={`true ${index === 0?'gradient-bg':''}`}>
+                                <Text className={`user_name ${index === 0?'gradient-name':''}`}>{item.user_name}</Text><Text className={`user_message ${index === 0?'gradient-ms':''}`}>{item.user_message}</Text></View>}
+                              renderHide={<View className='true'><Text className='user_name'>{item.user_name}:</Text><Text className='user_message'>{item.user_message}</Text></View>}>
+                            </OwnOpacity>
+                          </View>
                         )
                       })
                     }
-                  </View>
+                  {/*</View>*/}
                 </ScrollView>
               </View>
             <View className='live-footer-feature'>
@@ -643,7 +793,7 @@ handleSendMessage =(e) =>{
                   <View className='container'/>
                   <View className='iconfont icon-xinaixin' onClick={this.clickBtn.bind(this,'like')}/>
                   {showGift &&
-                    <Image src={`${cdn}/${current}.png`} className='img' mode='widthFix' onAnimationEnd={this.animationEnd.bind(this)}/>
+                    <Image src={`${cdn}/${current}.png`} className='img' mode='widthFix' onAnimationEnd={this.animationEnd.bind(this)} style={{zIndex:'100000000'}}/>
                   }
                 </View>
                 <View className='more-item'>
@@ -666,7 +816,7 @@ handleSendMessage =(e) =>{
                   <View className='user_dec'>{ownerInfo.selfSignature}</View>
                   <View className='user_dec_more'>
                     <View className='user_dec_more_item'><Text className='dec-data'>暂未开放</Text><Text className='dec-dec'>交易</Text></View>
-                    <View className='user_dec_more_item'><Text className='dec-data'>{fans}</Text><Text className='dec-dec'>粉丝</Text></View>
+                    <View className='user_dec_more_item' onClick={this.showMoreDec.bind(this,'watcher-detail','fans')}><Text className='dec-data'>{fans}</Text><Text className='dec-dec'>粉丝</Text></View>
                     <View className='user_dec_more_item'><Text className='dec-data'>暂未开放</Text><Text className='dec-dec'>送出</Text></View>
                     <View className='user_dec_more_item'><Text className='dec-data'>{likes?likes:0}</Text><Text className='dec-dec'>收到点赞</Text></View>
                   </View>
@@ -683,6 +833,7 @@ handleSendMessage =(e) =>{
               <View className='watcher-detail' onClick={this.stop}>
                 <View className='watcher-detail-title'>
                   <View className={`change-type-com ${watcherType === 'com'?'choosed':''}`} onClick={this.changeWatcher.bind(this,'com')}>互动榜</View>
+                  <View className={`change-type-fans ${watcherType === 'fans'?'choosed':''}`} onClick={this.changeWatcher.bind(this,'fans')}>粉丝</View>
                   <View className={`change-type-line ${watcherType === 'line'?'choosed':''}`} onClick={this.changeWatcher.bind(this,'line')}>在线用户</View>
                 </View>
                 <View className='watcher-detail-dec'>
@@ -705,6 +856,7 @@ handleSendMessage =(e) =>{
                           return(
                             <WatcherItem
                               info={item}
+                              rank={watcherType === 'com'?index +1:''}
                             />
                           )
                         })
