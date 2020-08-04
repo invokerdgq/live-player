@@ -71,15 +71,14 @@ useHooks()
   class App extends Component {
     // eslint-disable-next-line react/sort-comp
     componentWillMount () {
-      console.log('jjjjjj')
       console.log(this.$router.params)
        entry.entryLaunch(this.$router.params.query)
+      Taro.setKeepScreenOn({
+        keepScreenOn: true
+      })
     }
 
     componentDidMount () {
-     Taro.setKeepScreenOn({
-       keepScreenOn: true
-     })
       const promoterExp = Taro.getStorageSync('distribution_shop_exp')
       if (Date.parse(new Date()) - promoterExp > 86400000 * 3) {
         Taro.setStorageSync('distribution_shop_id', '')
@@ -140,10 +139,10 @@ useHooks()
         // 'pages/member/index',
         // 'pages/member/pay',
         // 'pages/member/pay-rule',
-        // 'pages/member/coupon',
-        // 'pages/member/coupon-detail',
-        // 'pages/member/address',
-        // 'pages/member/edit-address',
+        'pages/member/coupon',
+        'pages/member/coupon-detail',
+        'pages/member/address',
+        'pages/member/edit-address',
         // 'pages/member/setting',
         // 'pages/member/userinfo',
         // 'pages/member/item-history',
@@ -258,6 +257,9 @@ useHooks()
       ]
     }
     componentDidShow (options) {
+      Taro.setKeepScreenOn({
+        keepScreenOn: true
+      })
       if (process.env.TARO_ENV === 'weapp') {
         FormIds.startCollectingFormIds()
         if (S.getAuthToken()) {
@@ -277,7 +279,13 @@ useHooks()
 
       const { referrerInfo } = this.$router.params || {}
       if (referrerInfo) {
-        Taro.setStorageSync('extraData',referrerInfo.extraData)
+        const init = Taro.getStorageSync('extraData')
+        let data = referrerInfo.extraData
+        if(init){
+          data = {...init,...data}
+          console.log(data)
+        }
+        Taro.setStorageSync('extraData',data)
         if(referrerInfo.extraData){
          if(referrerInfo.extraData.im_id){
            Taro.setStorageSync('im_id',referrerInfo.extraData.im_id)

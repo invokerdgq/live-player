@@ -9,6 +9,11 @@ import NavGap from "../../components/nav-gap/nav-gap";
 
 import './wxauth.scss'
 
+@connect(({passenger}) => ({
+  passenger
+}),(dispatch) =>({
+  changePassenger:(load) => dispatch({type:'passenger',payload:load})
+}))
 @connect(({ colors }) => ({
   colors: colors.current
 }))
@@ -18,7 +23,16 @@ export default class WxAuth extends Component {
     isAuthShow: false
   }
 
-  componentDidMount () {
+  componentDidShow () {
+    const extraData = Taro.getStorageSync('extraData')
+    console.log('llllllllllllllllllllllllllllll')
+    if(extraData && extraData.token && extraData.path){
+      Taro.setStorageSync('auth_token',extraData.token)
+      Taro.navigateTo({
+        url:extraData.path
+      })
+      return
+    }
     this.autoLogin()
   }
 
@@ -54,7 +68,7 @@ export default class WxAuth extends Component {
         : '/pages/qrcode-buy'
     } else if(!Taro.getStorageSync('help')) {
       redirect_url = redirect
-        ? decodeURIComponent(redirect)
+        ? decodeURIComponent(redirect+'?is_clear=true')
         : '/pages/member/index'
     }else{
       Taro.redirectTo({
@@ -71,6 +85,7 @@ export default class WxAuth extends Component {
         is_vip:res.vipgrade.is_vip,
         vip_grade:res.vipgrade.vip_grade_id
       })
+      console.log('url',redirect_url)
       Taro.redirectTo({
         url: redirect_url
       })
@@ -100,6 +115,7 @@ export default class WxAuth extends Component {
 
 
   handleGetUserInfo = async (res) => {
+   if(!res) return
     const loginParams = res.detail
     const { iv, encryptedData, rawData, signature, userInfo } = loginParams
 
@@ -115,40 +131,34 @@ export default class WxAuth extends Component {
     }
 
     const { code } = await Taro.login()
-   const {token} = await api.wx.login({ code,
-      iv,
-      encryptedData,
-      rawData,
-      signature,
-      userInfo})
-    if(token){
-      S.setAuthToken(token)
-      return Taro.navigateTo({
-        url:'/others/pages/live/live'
-      })
-    }else{
-      Taro.showModal({
-        title:'前往苏心淘注册',
-        success:(res) => {
-          if(res.confirm){
-             Taro.navigateBackMiniProgram({
-              appId:'wx9378bcb903abd3ab',
-              path:`/pages/auth/wxauth`,
-              extraData:{
-                register:true
-              },
-              envVersion:'develop',
-              success(){
-                console.log('跳转 苏心淘')
-              }
-            })
-          }else{
-
-          }
+    try{
+      const {token} = await api.wx.login({ code,
+        iv,
+        encryptedData,
+        rawData,
+        signature,
+        userInfo})
+      if(token) {
+        S.setAuthToken(token)
+        this.props.changePassenger(false)
+        return Taro.redirectTo({
+          url: '/others/pages/live/live?is_clear=true'
+        })
+      }
+    }catch (e) {
+      Taro.navigateToMiniProgram({
+        appId:'wx9378bcb903abd3ab',
+        path:`/pages/auth/wxauth`,
+        extraData:{
+          register:true
+        },
+        envVersion:'develop',
+        success(){
+          console.log('跳转 苏心淘')
         }
       })
+      return
     }
-
     Taro.showLoading({
       mask: true,
       title: '正在加载...'
@@ -236,8 +246,8 @@ export default class WxAuth extends Component {
                   lang='zh_CN'
                   customStyle={`background: ${colors.data[0].primary}; border-color: ${colors.data[0].primary}`}
                   openType='getUserInfo'
-                  onClick={this.handleNews.bind(this)}
-                  onGetUserInfo={this.handleGetUserInfo}
+                  // onClick={this.handleNews.bind(this)}
+                  onGetUserInfo={this.handleGetUserInfo.bind(this)}
                 >授权允许</AtButton>
                 <AtButton className='back-btn' type='default' onClick={this.handleBackHome.bind(this)}>拒绝</AtButton>
               </View>

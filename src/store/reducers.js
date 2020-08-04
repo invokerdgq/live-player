@@ -5,8 +5,9 @@ import address from './address'
 import member from './member'
 import tabBar from './tab-bar'
 import colors from './colors'
-import giftId from "./giftId";
+import giftId from "./giftId"
 import step from './step'
+import passenger from "./is_passenger";
 
 export default combineReducers({
   cart,
@@ -16,5 +17,6 @@ export default combineReducers({
   tabBar,
   colors,
   giftId,
-  step
+  step,
+  passenger
 })

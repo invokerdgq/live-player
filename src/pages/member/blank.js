@@ -10,13 +10,13 @@ export default class Blank extends Component{
   // }
   handleNavigate(){
     Taro.navigateTo({
-      url:'/others/pages/live/live?im_id=92458177&uid=GZ212W'
+      url:'/others/pages/live/live?im_id=75377417&uid=GZ212W'
     })
   }
   render() {
     return(
-      <View style={{backgroundUrl:`${cdn}/kfmm.png`}} className='blank'>
-        <View className='to-kefu' onClick={this.handleNavigate.bind(this)}>进入客服小姐姐的直播间</View>
+      <View style={{backgroundUrl:`${cdn}/gf.png`}} className='blank'>
+        <View className='to-kefu' onClick={this.handleNavigate.bind(this)}>进入苏心淘官方直播间</View>
       </View>
     )
   }
