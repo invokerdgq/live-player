@@ -10,19 +10,33 @@ import api from '@/api'
 import S from '@/spx'
 import entry from "../../../utils/entry";
 
-
-import TLS from './tls.min'
-import TIM from './tim-wx'
+import TLS from "./tls.min";
 import {Loading} from "../../../components";
 import OwnerModal from './coms/own-modal'
 import {connect} from "@tarojs/redux";
+import WithTim from "../../../hocs/withTim";
 
-let tls
 
-@connect(({passenger}) => ({
-  passenger
-}),(dispatch) =>({
-  changePassenger:(load) => dispatch({type:'passenger',payload:load})
+@WithTim
+@connect(({liveConfig}) => ({
+  liveConfig
+}),(dispatch) => ({
+  setDevice:(payload) => {
+    dispatch({type:'liveConfig/Position',payload})
+  },
+  setBeautify:(payload) => {
+    dispatch({type:'liveConfig/Beautify',payload})
+  },
+  setFilter:(payload) => {
+    dispatch({type:'liveConfig/Filter',payload})
+  }
+}))
+@connect(({roomConfig}) => ({
+  roomConfig
+}),(dispatch) => ({
+  setProducts:(payload) => {
+    dispatch({type:'products/set',payload})
+  }
 }))
 @withPager
 export default class Live extends Component{
@@ -36,12 +50,28 @@ export default class Live extends Component{
     super(props);
     this.state = {
       ...this.state,
-      first:true,
+      owner:1,
+      bl:0,
+      fl:0,
+      location:'',
+      likeCount:[],
+      filterList:[
+        {value:'standard',label:'标准'},
+        {value:'pink',label:'粉嫩'},
+        {value:'nostalgia',label:'怀旧'},
+        {value:'blues',label:'蓝调'},
+        {value:'romantic',label:'浪漫'},
+        {value:'cool',label:'清凉'},
+        {value:'fresher',label:'清新'},
+        {value:'solor',label:'日系'},
+        {value:'aestheticism',label:'唯美'},
+        {value:'whitening',label:'美白'},
+        {value:'cerisered',label:'樱红'},
+      ],
       timerLiver:null,
       showExitChoose:false,
       onlineNum:0,
       im_id:'',
-      is_share:false,
       numLimit:false,
       buyerNick:'',
       height:0,
@@ -76,68 +106,37 @@ export default class Live extends Component{
     }
     this.top = Taro.getStorageSync('top')
   }
-  componentDidShow() {
-    console.log('----------------------------------------------')
+  componentWillMount() {
+    this.randomGift()
+    const im_id = Taro.getStorageSync('im_id')
+    this.state.im_id = im_id
+    this.state.owner = 1
+  }
+  componentDidShow(){
     Taro.setKeepScreenOn({
       keepScreenOn: true
     })
-    entry.entryLaunch(this.$router.params)
-    const  extraData  = Taro.getStorageSync('extraData')
-    const im_id = Taro.getStorageSync('im_id')
-    if(extraData){
-      Taro.setStorageSync('auth_token',extraData.token)
-    }
-    this.setState({
-      im_id:im_id,
-      owner:extraData?extraData.owner:0
-    },() => {
-      this.randomGift()
-      this.preLog()
-    })
-    if(this.state.owner == 1){
-      tls.sendCustomMsgAndEmitEvent(TLS.EVENT.ROOM_STATUS_CHANGE,'ON')
-    }
+      if(!this.tls){
+        this.initTim()
+      }else{
+        this.tls.sendCustomMsgAndEmitEvent(TLS.EVENT.ROOM_STATUS_CHANGE,'ON')
+      }
+  }
+  componentDidMount() {
+    this.context = Taro.createLivePusherContext()
   }
   componentWillUnmount(){
     clearInterval(this.state.timer)
     clearInterval(this.state.timerLiver)
     this.statusSend('off')
-    // if(this.state.owner){
-    //   tls.sendCustomMsgAndEmitEvent(TLS.EVENT.ROOM_STATUS_CHANGE,'END')
-    // }
-    tls.exitRoom()
-  }
-  componentDidHide(){
-    if(this.state.owner ==1){
-      tls.sendCustomMsgAndEmitEvent(TLS.EVENT.ROOM_STATUS_CHANGE,'PAUSE')
-    }
-  }
-  componentWillMount() {
-    
+    this.tls.sendCustomMsgAndEmitEvent(TLS.EVENT.ROOM_STATUS_CHANGE,'END')
+    this.tls.exitRoom()
   }
 
-  preLog(){
-    if(!S.getAuthToken()){
-      Taro.showModal({
-        title:'登录发现更多精彩',
-        cancelText:'暂不登录',
-        confirmText:'去登陆',
-        success:async (res) => {
-          if(res.confirm){
-            S.login(this)
-          }else{
-            const { code } = await Taro.login()
-            const { token } = await api.wx.login({ code,guest:1 })
-            Taro.setStorageSync('auth_token',token)
-            this.props.changePassenger(true)
-            this.initTim()
-          }
-        }
-      })
-      return
-    }
-    this.initTim()
+  componentDidHide(){
+      if(this.tls) this.tls.sendCustomMsgAndEmitEvent(TLS.EVENT.ROOM_STATUS_CHANGE,'PAUSE')
   }
+
   postUserInfo = async ()=>{
     Taro.showLoading({
       title:'加载中',
@@ -158,15 +157,15 @@ export default class Live extends Component{
       Taro.hideLoading()
     }
   }
-initTim = async  () => {
-  if(tls&&tls.destroy){
-    tls.destroy()
+initTim = async()=>{
+  if(!S.getAuthToken()) {
+    S.login(this)
+    return
   }
   await this.postUserInfo()
+  const {user_id = 1,userSig,url,products,is_subscribe,room_live_link,room_status} = await api.live.getUserSig({owner:1,room_id:this.state.im_id})
 
-  const extraData = Taro.getStorageSync('extraData')
-  const {user_id = 1,userSig,url,products,is_subscribe,room_live_link,room_status} = await api.live.getUserSig({owner:this.state.owner,room_id:this.state.im_id})
-  let list
+  let list;
   try{
     let newList =  JSON.parse(products)
    if( Array.isArray(newList)){
@@ -180,67 +179,22 @@ initTim = async  () => {
   this.setState({
     pullStreamLink:room_live_link,
     pushStreamLink:url,
-    room_status:extraData.owner == 1?1:room_status,
-    // room_cover:extraData.room_cover,
-    is_subscribe:extraData.owner != 1?is_subscribe !=0:1,
-    devicePosition: extraData.devicePosition || '',
-    beautify:extraData.beautify || '',
-    filter:extraData.filter || '',
+    room_status:1,
+    is_subscribe:1,
     goodsList:list
   })
-  if(extraData.owner != 1){
-    api.live.addHistory({
-      room_id:this.state.im_id,
-      source:Taro.getStorageSync('distribution_shop_id')
-    })
-  }
-
-  Taro.showLoading({
-    title:'直播间环境准备中',
-    mask:true
+  this.init(userSig,user_id,this.state.im_id,() => {
+    this.tls.sendCustomMsgAndEmitEvent(TLS.EVENT.ROOM_STATUS_CHANGE,'ON')
+    this.nextPage()
+    this.liverStatusSend()
   })
-
-  console.log('退出房间------------------------------')
-  tls = new TLS ({
-    SDKAppID: '1400406635',
-    userSig: userSig,
-    userName: user_id,
-    TIM:TIM
-  })
-  console.log(tls)
-  tls.on(TLS.EVENT.SDK_READY,async () => {
-    Taro.hideLoading()
-    Taro.showToast({
-      title:'环境准备好了~',
-      icon:'success',
-      duration:1500
-    })
-    if(this.state.ownerInfo) return
-    try {
-      let {groupInfo, userInfo} = await tls.joinRoom({
-        roomID: this.state.im_id,
-        getOwnerInfo:true
+  Taro.getLocation({
+    success: (res) => {
+      api.live.getLocationDetail(res).then((res) => {
+        this.setState({
+          location:res.data.result.address
+        })
       })
-      // 已经在房间中 再次进入 拿不到groupInfo
-      if(!groupInfo){
-        groupInfo = await tls.getRoomInfo()
-      }
-      this.nextPage()
-      if(this.state.owner == 1)
-      {
-        this.liverStatusSend()
-        tls.sendCustomMsgAndEmitEvent(TLS.EVENT.ROOM_STATUS_CHANGE,'ON')
-      }
-      this.statusSend('on')
-      this.setState({
-        userInfo,
-        groupInfo,
-        ownerInfo:groupInfo.ownerInfo,
-        fans:groupInfo.groupCustomField[1].value,
-        likes:groupInfo.groupCustomField[0].value,
-      },() => { this.initMintor()})
-    }catch (e) {
-      console.log(e)
     }
   })
 }
@@ -248,17 +202,19 @@ initTim = async  () => {
 onShareAppMessage(obj) {
     return{
       title:'快来观看直播吧~',
-      path:`/others/pages/live/live?im_id=${this.state.im_id}&uid=${this.state.memberInfo.user_card_code}`
+      path:`/others/pages/live/live-watcher?im_id=${this.state.im_id}&uid=${this.state.memberInfo.user_card_code}`,
+      imageUrl:this.state.groupInfo.avatar
     }
 }
 
-  randomGift = ()=>{
+randomGift = ()=>{
     let index = Math.floor(Math.random()*(this.state.giftList.length-1))
-  this.setState({
-    current:this.state.giftList[index]
-  })
+     this.setState({
+          current:this.state.giftList[index]
+        })
 }
-liverStatusSend(){
+
+liverStatusSend(){  //主播状态变更发送
   let interval =  () =>{
     try{
       api.live.changeLiverStatus({room_id:this.state.im_id})
@@ -272,163 +228,81 @@ liverStatusSend(){
     timerLiver
   })
 }
-statusSend(type){
-  let interval =  () =>{
-           try{
-             api.live.changeUserStatus({room_id:this.state.im_id,status:type})
-           }catch (e) {
-             console.log(e)
-           }
-         }
-         interval()
-  if(type === 'on'){
-    let timer = setInterval(interval,1000*60*3)
-    this.setState({
-      timer
-    })
-  }else{
-    clearInterval(this.state.timer)
-    try{
-      api.live.changeUserStatus({room_id:this.state.im_id,status:type})
-    }catch (e) {
-      console.log(e)
-    }
-  }
-}
 
-initMintor() {
+handleWatchTim(type,data){
   let formate = this.formate
-    //房间状态发生改变 -----------------------------------------------
-  tls.on(TLS.EVENT.ROOM_STATUS_CHANGE, async(data) => {
-    let msg = this.handleMsgLength()
-    switch (data.value) {
-      case 'ON':
-        msg.push({
-          user_name: `主播 ${this.state.ownerInfo.nick}`,
-          user_message: '加入了直播间',
-          // id: `id${Date.now()}`
-        })
-        this.setState({
-          msgList: msg,
-          liverStatus: 'ON'
-        })
-        break
-      case 'PAUSE':
-        msg.push({
-          user_name: `主播 ${this.state.ownerInfo.nick}`,
-          user_message: '暂时离开',
-        })
-        this.setState({
-          msgList: msg,
-          liverStatus: 'PAUSE'
-        })
-        break
-      default :
-        msg.push({
-          user_name: `主播 ${this.state.ownerInfo.nick}`,
-          user_message: '已下线',
-          // id: `id${Date.now()}`
-        })
-        this.setState({
-          msgList: msg,
-          liverStatus: 'END'
-        })
-    }
-    })
-  //有人加群-----------------------------------------------
-  tls.on(TLS.EVENT.JOIN_GROUP, async (data) => {
-    console.log('已经加入了群聊', Math.random())
-    let msg = this.handleMsgLength()
-    msg.push({
-      user_name: formate(data.nick),
-      user_message: '加入了直播间',
-      // id: `id${Date.now()}`
-    })
-    this.setState({
-      msgList: msg,
-      onlineNum :this.state.onlineNum + 1
-    })
-    // const res = api.
-  })
-
-  //有人退群-----------------------------------------------
-  tls.on(TLS.EVENT.EXIT_GROUP, async (data) => {
-    let msg = this.handleMsgLength()
-    msg.push({
-      user_name: formate(data.nick),
-      user_message: '退出了直播间',
-      // id: `id${Date.now()}`
-    })
-    this.setState({
-      msgList: msg,
-      onlineNum :this.state.onlineNum - 1
-    })
-  })
-
-  //有人购买东西---------------------------------------------
-  tls.on(TLS.EVENT.BUY_GOODS,async (data) => {
-    const {nick,avatar,value,userID} = data
-    this.setState({
-      buyerNick:nick
-    })
-  })
-  //有人发消息-----------------------------------------------
-  tls.on(TLS.EVENT.MESSAGE, async(data) => {
-    let msg = this.handleMsgLength()
-    msg.push({
-      user_name: formate(data.nick,true),
-      user_message: data.message,
-      // id: `id${Date.now()}`
-    })
-    this.setState({
-      msgList: msg
-    })
-  })
-
-  //有人给主播点赞-----------------------------------------------
-  tls.on(TLS.EVENT.LIKE, async(data) => {
-    let msg = this.handleMsgLength()
-    msg.push({
-      user_name: formate(data.nick),
-      user_message: '给主播点赞了',
-      // id: `id${Date.now()}`
-    })
-    this.setState({
-      // msgList: msg,
-      likes:Number(this.state.likes) +1
-    })
-  })
-
-  //有人关注了主播-----------------------------------------------
-  tls.on(TLS.EVENT.ATTENTION, async(data) => {
-    let msg = this.handleMsgLength()
-    msg.push({
-      user_name: formate(data.nick),
-      user_message: '关注了主播',
-      // id: `id${Date.now()}`
-    })
-    this.setState({
-      msgList: msg,
-      fans:Number(this.state.fans) +1
-    })
-    const a = await tls.getUserInfo()
-  })
-
-  //取消关注-----------------------------------------------
-  tls.on(TLS.EVENT.CANCELATTENTION, async(data) => {
-    let msg = this.handleMsgLength()
-    msg.push({
-      user_name: formate(data.nick),
-      user_message: '取消关注主播',
-      // id: `id${Date.now()}`
-    })
-    this.setState({
-      msgList: msg,
-      fans:Number(this.state.fans) -1
-    })
-    const a = await tls.getUserInfo()
-  })
-
+  let msg = this.handleMsgLength()
+   switch (type) {
+     case 'RoomStatusChange':
+       break
+     case 'JoinGroup':
+       if(data.nick === this.state.ownerInfo.nick) return
+       msg.push({
+         user_name: formate(data.nick),
+         user_message: '加入了直播间',
+       })
+       this.setState({
+         msgList: msg,
+         onlineNum :this.state.onlineNum + 1
+       })
+       break
+     case 'ExitGroup':
+       msg.push({
+         user_name: formate(data.nick),
+         user_message: '退出了直播间',
+       })
+       this.setState({
+         msgList: msg,
+         onlineNum :this.state.onlineNum - 1
+       })
+       break
+     case 'BuyGoods':
+       const {nick} = data
+       this.setState({
+         buyerNick:nick
+       })
+       break
+     case 'Message':
+       msg.push({
+         user_name: formate(data.nick,true),
+         user_message: data.message,
+       })
+       this.setState({
+         msgList: msg
+       })
+       break
+     case 'Like':
+       msg.push({
+         user_name: formate(data.nick),
+         user_message: '给主播点赞了',
+       })
+       this.setState({
+         likes:Number(this.state.likes) +1
+       })
+       break
+     case 'Attention':
+       msg.push({
+         user_name: formate(data.nick),
+         user_message: '关注了主播',
+       })
+       this.setState({
+         msgList: msg,
+         fans:Number(this.state.fans) +1
+       })
+       break
+     case 'CancelAttention':
+       msg.push({
+         user_name: formate(data.nick),
+         user_message: '取消关注主播',
+       })
+       this.setState({
+         msgList: msg,
+         fans:Number(this.state.fans) -1
+       })
+       break
+     default :
+       break
+   }
 }
 
 handleMsgLength(){
@@ -441,13 +315,13 @@ handleMsgLength(){
     }
   return arr
   }
-  formate = (name,add=false)=>{
+
+formate = (name,add=false)=>{
     return `${name}${add?' :':''}`
   }
 
 handleSendMessage = async(e) =>{
-    tls.sendMessage(e.detail.value).then((res) => {
-     console.log(res)
+    this.tls.sendMessage(e.detail.value).then((res) => {
         let msg = this.handleMsgLength();
         msg.push({
           user_name: this.formate(res.nick,true),
@@ -457,12 +331,10 @@ handleSendMessage = async(e) =>{
        msgList:msg,
        inputMessage:''
      })
-      console.log(this.state)
    })
 }
 
   fetch = async (params)=>{
-    const  extraData  = Taro.getStorageSync('extraData')
     const {page_no,page_size} = params
     if(this.state.watcherType === 'com'){
       const option = {
@@ -527,20 +399,18 @@ handleSendMessage = async(e) =>{
     }
   }
 
-  clickBack(){
-    Taro.navigateBackMiniProgram()
-  }
   showMoreDec(type,pType,e){
     this.setState({
       type:type
     })
     if(type === 'cart-detail'){
       this.nextPage()
-      tls.sendCustomMsgAndEmitEvent(TLS.EVENT.BUY_GOODS,'BUY')
+      this.tls.sendCustomMsgAndEmitEvent(TLS.EVENT.BUY_GOODS,'BUY')
     }
-    this.changeWatcher(pType)
-    if(e)e.stopPropagation()
+    if(pType) this.changeWatcher(pType)
+    if(e) e.stopPropagation()
   }
+
   showData(){
     if(this.state.type !== ''){
       this.setState({
@@ -570,10 +440,6 @@ handleSendMessage = async(e) =>{
  async clickBtn(type){
     switch (type) {
       case 'like':
-        this.randomGift()
-        this.setState({
-          showGift:true
-        })
         try{
           const res = await api.live.giveLike({room_id:this.state.im_id})
         }catch (e) {
@@ -583,12 +449,12 @@ handleSendMessage = async(e) =>{
           )
           return
         }
-        tls.like().then(async function(data) {})
+        this.tls.like().then(async function(data) {})
         break
       case 'attend':
         Taro.showLoading({title:'处理中',mask:true})
         if(this.state.is_subscribe == 1){
-          tls.cancelAttention().then(async ()=>{
+          this.tls.cancelAttention().then(async ()=>{
             const res = await api.live.attend({room_id:this.state.im_id})
             this.setState({
               is_subscribe:!this.state.is_subscribe
@@ -598,15 +464,21 @@ handleSendMessage = async(e) =>{
           })
         }else{
           Taro.showLoading({title:'处理中',mask:true})
-          tls.attention().then(async (data) => {
+          this.tls.attention().then(async (data) => {
             const res = await api.live.attend({room_id:this.state.im_id})
             this.setState({
               is_subscribe:!this.state.is_subscribe
             })
-            // Taro.showToast({title:`关注成功`})
+            Taro.showToast({title:`关注成功`})
             Taro.hideLoading()
           })
         }
+        break
+      case 'gift':
+        Taro.showToast({
+          title:'暂未开放',
+          icon:'none'
+        })
         break
       default :
         Taro.showToast({
@@ -614,11 +486,6 @@ handleSendMessage = async(e) =>{
           icon:'none'
         })
     }
-  }
-  clearMessge(){
-    this.setState({
-      inputMessage:''
-    })
   }
   changeValue (e){
     this.setState({
@@ -641,20 +508,6 @@ handleSendMessage = async(e) =>{
     })
   }
   handleBuy(item){
-    console.log(this.props)
-    if(this.props.passenger.is_passenger){
-      Taro.showModal({
-        title:'购买请先登录',
-        cancelText:'放弃购买',
-        confirmText:'去登陆',
-        success:(res) => {
-          if(res.confirm){
-            S.login(this)
-          }
-        }
-      })
-      return
-    }
     Taro.navigateTo({
      url: `/pages/item/espier-detail?id=${item.item_id}&room_id=${this.state.im_id}`
     })
@@ -670,23 +523,59 @@ handleSendMessage = async(e) =>{
    })
   }
   handleOwnCancel(){
-    console.log('cancel------------------------------')
     this.setState({
       showExitChoose:false
     })
   }
   handleOwnConfirm(){
-    if(this.state.owner == '1'){
-      this.statusSend('off')
-      tls.exitRoom()
-      tls.sendCustomMsgAndEmitEvent(TLS.EVENT.ROOM_STATUS_CHANGE,'END')
-    }else{
-      this.statusSend('off')
-      tls.exitRoom()
+      this.tls.sendCustomMsgAndEmitEvent(TLS.EVENT.ROOM_STATUS_CHANGE,'END')
+      this.liverStatusSend('off')
+      this.tls.exitRoom()
+  }
+
+  handleSetting(type,value,index){
+    switch (type) {
+      case 'device':``
+        this.props.setDevice(value)
+        console.log(this.context)
+        this.context.switchCamera({
+          success:() => {
+            console.log('切换成功')
+          }
+        })
+        break
+      case  'beautify':
+        this.props.setBeautify(value)
+        this.setState({
+          bl:index-3 >0?index-3:0
+        })
+        break
+      default :
+        this.props.setFilter(value)
+        this.setState({
+          fl:index-3 >0?index-3:0
+        })
     }
   }
+
+  handleLike(){
+    this.setState({
+      likeCount:[...this.state.likeCount,1]
+    })
+    this.clickBtn('like')
+  }
+  handleLikeEnd(index){
+    if(this.state.likeCount.length === (index +1)){
+      this.setState({
+        likeCount:[]
+      })
+    }
+  }
+  handleToStore(){
+    Taro.navigateTo({url:'/others/pages/live/store?setting=true'})
+  }
   render() {
-    const {liverStatus,showExitChoose,backType,fansList,onlineNum,buyerNick,showGift,current,is_subscribe,loading,room_cover,fans,likes,groupInfo,ownerInfo,type,msgList,watcherList,onlineList,watcherType,goodsList,pullStreamLink,pushStreamLink,room_status,inputMessage} = this.state
+    const {bl,fl,location,likeCount,filterList,liverStatus,showExitChoose,backType,fansList,onlineNum,buyerNick,showGift,current,is_subscribe,loading,fans,likes,groupInfo,ownerInfo,type,msgList,watcherList,onlineList,watcherType,goodsList,pullStreamLink,pushStreamLink,room_status,inputMessage} = this.state
     let newList
     let len = this.state.msgList.length
     if(watcherType === 'com'){
@@ -696,28 +585,17 @@ handleSendMessage = async(e) =>{
     }else{
       newList = fansList
     }
-
     return(
       <View>
         <OwnerModal
-        title={`确认${this.state.owner == 1?'关闭直播间':'退出直播间'}`}
+        title={`确认关闭直播间`}
         isShown={showExitChoose}
         ownCancel={this.handleOwnCancel.bind(this)}
         ownConfirm={this.handleOwnConfirm.bind(this)}
         />
         <View onClick={this.comfireExit.bind(this)} className='back' style={{top:this.top+'px'}}  openType='exit' target='miniProgram'><View className='iconfont icon-arrow-left'/></View>
          <View className='live-view'>
-           {
-             pushStreamLink != ''?
-             <LivePusher className='live' autopush={true} url={pushStreamLink} beauty={this.state.beautify} filter={this.state.filter} devicePosition={this.state.devicePosition}/>:
-             room_status == 1?
-                liverStatus === 'ON'?
-               <LivePlayer className='live' src={pullStreamLink} autoplay={true} objectFit='fillCrop'/>:
-               liverStatus === 'PAUSE'?
-                 <View className='outline-live'>主播暂时离开</View>:
-                 <View className='outline-live'>主播已下线</View>:
-                 <View className='outline-live'>主播还未开播</View>
-           }
+             <LivePusher className='live' autopush={true} url={pushStreamLink} beauty={this.props.liveConfig.beautify} filter={this.props.liveConfig.filter} devicePosition={this.props.liveConfig.devicePosition}/>:
          </View>
         <View className='data-view' onClick={this.showData.bind(this)}>
           <View className='live-header' style={{top:this.top +'px'}}>
@@ -762,7 +640,7 @@ handleSendMessage = async(e) =>{
                  }
                />
              </View>
-            <View className='live-header-bottom'>
+            <View className='live-header-bottom' onClick={this.showMoreDec.bind(this,'watcher-detail','com')} >
               <OwnOpacity
               containerClass='contain-bottom'
               renderTrue = {
@@ -778,7 +656,6 @@ handleSendMessage = async(e) =>{
                 </View>
               }
               />
-
             </View>
           </View>
           {type === ''&&
@@ -826,21 +703,39 @@ handleSendMessage = async(e) =>{
                 <Input type='text' onFocus={this.changeHeight.bind(this)} onBlur={this.recoverHeight} placeholder='说点什么...' className='input' placeholderClass='holder' onConfirm={this.handleSendMessage.bind(this)} value={inputMessage} onInput={this.changeValue.bind(this)} adjustPosition={false} confirmType={'确认'}/>
               </View>
               <View className='more'>
-                <View className='more-item' onClick={this.showMoreDec.bind(this,'cart-detail')}>
+                <View className='more-item order-1' onClick={this.showMoreDec.bind(this,'cart-detail')}>
                   <View className='container'/>
                   <View className='cart'><Image className='cart-img' src={`${cdn}/cart.png`} mode='widthFix'/></View>
                 </View>
-                <View className='more-item'>
+                <View className={`more-item ${this.state.owner == 0?'order-3':'order-2'}`}>
                   <View className='container'/>
-                  <View className='like' onClick={this.clickBtn.bind(this,'like')}><Image src={`${cdn}/like.png`} mode='widthFix' className='like-img'/></View>
+                  <View className='like' onClick={this.clickBtn.bind(this,'gift')}><Image src={`${cdn}/like.png`} mode='widthFix' className='like-img'/></View>
                   {showGift &&
                     <Image src={`${cdn}/${current}.png`} className='img' mode='widthFix' onAnimationEnd={this.animationEnd.bind(this)} style={{zIndex:'100000000'}}/>
                   }
                 </View>
-                <View className='more-item'>
+                <View className={`more-item ${this.state.owner == 0?'order-4':'order-3'}`}>
                   <View className='container'/>
                   <Button className='iconfont icon-zhuanfa' openType='share'/>
                 </View>
+                {
+                  this.state.owner == 1?
+                <View className='more-item order-4'>
+                  <View className='container'/>
+                  <View className='iconfont icon-setting-copy' onClick={this.showMoreDec.bind(this, 'live-setting')}/>
+                </View>:
+                    <View className='more-item order-2' onClick={this.handleLike.bind(this)}>
+                      <View className='container'/>
+                      <View className='iconfont icon-xinaixin'/>
+                      {
+                            likeCount.length !== 0 && likeCount.map((item,index) => {
+                                return  (
+                                  <Image src={`${cdn}/Like-ani.png`} mode='widthFix' className='img-like' onAnimationEnd={this.handleLikeEnd.bind(this,index)} key='like'/>
+                                )
+                              })
+                      }
+                    </View>
+                }
               </View>
             </View>
           </View>
@@ -853,7 +748,7 @@ handleSendMessage = async(e) =>{
                  </View>
                 <View className='live-detail-dec'>
                   <View className='user_name'>{ownerInfo.nick}</View>
-                  <View className='user_address'><View className='iconfont icon-dizhi'/><Text className='address'>{ownerInfo.location}</Text></View>
+                  <View className='user_address'><View className='iconfont icon-dizhi'/><Text className='address'>{location}</Text></View>
                   <View className='user_dec'>{ownerInfo.selfSignature}</View>
                   <View className='user_dec_more'>
                     <View className='user_dec_more_item'><Text className='dec-data'>暂未开放</Text><Text className='dec-dec'>交易</Text></View>
@@ -897,7 +792,7 @@ handleSendMessage = async(e) =>{
                           return(
                             <WatcherItem
                               info={item}
-                              rank={(watcherType === 'com'&&index < 3)?index +1:''}
+                              rank={watcherType === 'com'?index +1:''}
                             />
                           )
                         })
@@ -940,11 +835,68 @@ handleSendMessage = async(e) =>{
                       {
                         goodsList.length === 0&&
                           <View className='none-goods'>
-                            主播懒得一批，暂时没有商品
+                            主播暂时没有选择商品
                           </View>
                       }
                     </View>
                   </ScrollView>
+                </View>
+              </View>
+          }
+          {
+            type === 'live-setting'&&
+              <View className='setting-detail' onClick={this.stop}>
+                <View className='setting-title'>设置</View>
+                <View className='setting-item'>
+                  <View className='item-title'>摄像头</View>
+                  <View className='item-contain first'>
+                    <View className={`config-item ${this.props.liveConfig.devicePosition === 'front'?'selected':''}`} onClick={this.handleSetting.bind(this,'device','front')}>前置</View>
+                    <View className={`config-item ${this.props.liveConfig.devicePosition === 'back'?'selected':''}`} onClick={this.handleSetting.bind(this,'device','back')}>后置</View>
+                  </View>
+                </View>
+                <View className='setting-item'>
+                  <View className='item-title'>美颜</View>
+                  <ScrollView
+                    scrollWithAnimation={true}
+                    scrollIntoView={`b-view-${bl}`}
+                    enableFlex={true}
+                    scrollX
+                  >
+                    <View className='item-contain'>
+                      {
+                        '一遇我少误终生！！！'.split('').map((item,index) => {
+                          const sf = (index/10).toFixed(1)
+                          return(
+                            <View className={`config-item ${this.props.liveConfig.beautify == sf?'selected':''}`} onClick={this.handleSetting.bind(this,'beautify',sf,index)} id={`b-view-${index}`}>{index}</View>
+                          )
+                        })
+                      }
+                    </View>
+                  </ScrollView>
+                </View>
+                <View className='setting-item'>
+                  <View className='item-title'>滤镜</View>
+                  <ScrollView
+                    scrollWithAnimation={true}
+                    scrollIntoView={`f-view-${fl}`}
+                    enableFlex={true}
+                    scrollX
+                  >
+                    <View className='item-contain'>
+                      {
+                        filterList.map((item,index) => {
+                          return(
+                            <View className={`config-item ${this.props.liveConfig.filter === item.value?'selected':''}`} onClick={this.handleSetting.bind(this,'filter',item.value,index)} id={`f-view-${index}`}>
+                              {item.label}
+                            </View>
+                          )
+                        })
+                      }
+                    </View>
+                  </ScrollView>
+                </View>
+                <View className='setting-item' onClick={this.handleToStore.bind(this)}>
+                  <View className='item-title'><Text>店铺商品管理</Text><View className='iconfont icon-chakan'/></View>
                 </View>
               </View>
           }

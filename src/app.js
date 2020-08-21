@@ -1,6 +1,6 @@
 import Taro, { Component } from '@tarojs/taro'
 import S from '@/spx'
-import { Provider } from '@tarojs/redux'
+import {connect, Provider} from '@tarojs/redux'
 import configStore from '@/store'
 import useHooks from '@/hooks'
 import req from '@/api/req'
@@ -67,7 +67,13 @@ if(process.env.TARO_ENV === 'weapp'){
 
 const { store } = configStore()
 useHooks()
-
+  @connect(({liveConfig}) => ({
+    liveConfig
+  }),(dispatch) => ({
+    setDevice:(payload) => dispatch({type:'liveConfig/Position',payload}),
+    setBeautify:(payload) => dispatch({type:'liveConfig/Beautify',payload}),
+    setFilter:(payload) =>   dispatch({type:'liveConfig/Filter',payload})
+  }))
   class App extends Component {
     // eslint-disable-next-line react/sort-comp
     componentWillMount () {
@@ -224,6 +230,7 @@ useHooks()
           root: 'others',
           pages: [
             'pages/live/live',
+            'pages/live/live-watcher',
             'pages/live/store',
             // 'pages/home/license',
             // 'pages/protocol/privacy',
@@ -280,16 +287,17 @@ useHooks()
       const { referrerInfo } = this.$router.params || {}
       if (referrerInfo) {
         const init = Taro.getStorageSync('extraData')
-        let data = referrerInfo.extraData
+        let data = referrerInfo.extraData||{}
         if(init){
           data = {...init,...data}
           console.log(data)
         }
         Taro.setStorageSync('extraData',data)
-        if(referrerInfo.extraData){
-         if(referrerInfo.extraData.im_id){
+        if(data.devicePosition) this.props.setDevice(data.devicePosition)
+        if(data.beautify) this.props.setBeautify(data.beautify)
+        if(data.filter) this.props.setFilter(data.filter)
+        if(referrerInfo.extraData && referrerInfo.extraData.im_id){
            Taro.setStorageSync('im_id',referrerInfo.extraData.im_id)
-         }
         }
       }
     }

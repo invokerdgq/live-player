@@ -21,9 +21,7 @@ export default function withPager (Component) {
     }
 
     nextPage = async () => {
-      console.log('hahaha')
 			const  page  = this.state.page
-      console.log(page.hasNext)
       if (!page.hasNext || page.isLoading) return
 
       page.isLoading = true

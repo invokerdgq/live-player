@@ -100,7 +100,10 @@ const config = {
     },
     compile:{
       exclude:[
-        'src/others/pages/live/tim-wx.js'
+        'src/others/pages/live/tim-wx.js',
+        'src/others/pages/live/tls.min.js',
+        'src/hocs/tim-wx.js',
+        'src/hocs/tls.min.js'
       ]
     }
   },

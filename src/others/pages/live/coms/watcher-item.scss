@@ -6,6 +6,9 @@
   align-items: center;
   font-size: 31px;
   padding: 23px 35px;
+  .invisible{
+    visibility: hidden;
+  }
   &-rank1{
    color:#fe202c
   }

@@ -8,6 +8,8 @@ import colors from './colors'
 import giftId from "./giftId"
 import step from './step'
 import passenger from "./is_passenger";
+import liveConfig from "./live-config";
+import roomConfig from "./room-config";
 
 export default combineReducers({
   cart,
@@ -18,5 +20,7 @@ export default combineReducers({
   colors,
   giftId,
   step,
-  passenger
+  passenger,
+  liveConfig,
+  roomConfig
 })

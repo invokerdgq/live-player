@@ -25,7 +25,6 @@ export default class WxAuth extends Component {
 
   componentDidShow () {
     const extraData = Taro.getStorageSync('extraData')
-    console.log('llllllllllllllllllllllllllllll')
     if(extraData && extraData.token && extraData.path){
       Taro.setStorageSync('auth_token',extraData.token)
       Taro.navigateTo({
@@ -141,10 +140,11 @@ export default class WxAuth extends Component {
       if(token) {
         S.setAuthToken(token)
         this.props.changePassenger(false)
-        return Taro.redirectTo({
-          url: '/others/pages/live/live?is_clear=true'
-        })
+        setTimeout(() => {
+          Taro.navigateBack()
+        },500)
       }
+    return
     }catch (e) {
       Taro.navigateToMiniProgram({
         appId:'wx9378bcb903abd3ab',

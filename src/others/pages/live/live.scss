@@ -10,6 +10,13 @@
   0%   {opacity: 1}
   100%   {opacity: 0}
 }
+@keyframes newLike {
+  0%   {left: 20px;top: 0;transform: scale(1,1)}
+  25%  {left: 50px;top: -200px;transform: scale(1.5,1.5) rotate(360deg)}
+  50%  {left: 20px;top: -300px;transform: scale(1.75,1.75) rotate(720deg)}
+  75%  {left: -10px;top: -400px;transform: scale(2.25,2.25) rotate(1080deg);opacity: 1}
+  100% {left: 20px;top: -500px;transform: scale(2.75,2.75) rotate(1440deg)  ;opacity: 0}
+}
 
 .back{
   z-index:1000;
@@ -63,7 +70,7 @@
     left:0;
     width: 100vw;
     background: white;
-    border-radius: 10px 10px 0 0;
+    border-radius: 20px 20px 0 0 ;
     &-title{
       display: flex;
       flex-direction: row;
@@ -110,9 +117,64 @@
     }
   }
 
+  .setting-detail{
+    position: absolute;
+    bottom: 0;
+    left:0;
+    width: 100vw;
+    background: white;
+    padding: 30px 15px 50px;
+    border-radius: 20px 20px 0 0 ;
+    .setting-title{
+      font-size: 40px;
+      font-weight: bold;
+      margin: 20px 0 20px 20px;
+    }
+    .setting-item{
+      margin: 40px 0;
+      .item-title{
+        margin: 10px 20px 20px 20px;
+        border-bottom: solid 2px #eeeeee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        [class~=iconfont]{
+          font-size: 40px;
+          margin-right: 20px;
+        }
+      }
+    }
+    .item-contain{
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+    }
+    .first{
+      justify-content: center;
+      .config-item{
+        margin: 0 100px;
+      }
+    }
+    .config-item{
+      flex:none;
+      text-align: center;
+      line-height: 90px;
+      width: 90px;
+      height: 90px;
+      font-size: 28px;
+      border-radius: 45px;
+      background: #6f6b6b;
+      color:white;
+      margin-right: 20px;
+    }
+    .selected{
+      background: $color-theme;
+    }
+  }
+
   .cart-detail{
     background: white;
-    border-radius: 10px;
+    border-radius: 20px 20px 0 0 ;
     width: 100vw;
     position: absolute;
     left:0;
@@ -132,7 +194,6 @@
       }
     }
   }
-
   .live-detail{
     position: absolute;
     width: 100vw;
@@ -140,7 +201,7 @@
     left: 0;
     bottom:0;
     background:white ;
-    border-radius: 10px 10px 0 0;
+    border-radius: 20px 20px 0 0 ;
     &-avatar{
       width: 135px;
       height: 135px;
@@ -169,10 +230,14 @@
         display: flex;
         flex-direction: row;
         justify-content: center;
+        align-items: flex-end;
         font-size: 23px;
         color:#A1A1A1;
         .icon-dizhi{
           margin-right: 10px;
+          font-size: 40px;
+          width: 40px;
+          height: 40px;
         }
       }
       .user_dec{
@@ -367,6 +432,27 @@
         flex:1;
         flex-direction: row;
         justify-content: space-between;
+        .order-1{
+          order: 1;
+        }
+        .order-2{
+          order: 2;
+          .img-like{
+            animation: newLike 2.5s forwards;
+            width: 40px;
+            height: 40px;
+            position: absolute;
+            top:0;
+            left:15px;
+            z-index:1000
+          }
+        }
+        .order-3{
+          order: 3;
+        }
+        .order-4{
+            order: 4;
+          }
         &-item{
           width: 72px;
           height: 72px;
@@ -411,10 +497,10 @@
           //.icon-gouwucheman{
           //  color: #a3780a;
           //}
-          //.icon-xinaixin{
-          //  color: #e75252;
-          //}
-          .icon-zhuanfa{
+          .icon-xinaixin{
+            color: #e75252;
+          }
+          .icon-zhuanfa,.icon-setting-copy,.icon-xinaixin{
             display: inline-block;
             padding: 0;
             font-size: 45px;
@@ -429,7 +515,7 @@
       .opc{
         position: relative;
         .send-message{
-          width: 400px;
+          width: 330px;
           padding: 0 35px;
           border-radius: 35px;
           height: 70px;

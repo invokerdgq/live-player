@@ -44,10 +44,7 @@ export default class WatcherItem extends Component{
     }
     return(
       <View className='watcher-item'>
-        {
-          rank != ''&&
-            <View className={`watcher-item-rank${rank}`}>{rank}</View>
-        }
+        <View className={`watcher-item-rank${rank} ${rank>3?'invisible':''}`}>{rank}</View>
         <View className='avatar'>
           <Image mode='widthFix' className='img' src={info.face}/>
         </View>

@@ -1,4 +1,5 @@
 import req from './req'
+import Taro from '@tarojs/taro'
 
 export function getRoomList(params) {
   return req.get('/live/room',params)
@@ -36,3 +37,11 @@ export function getRoomFans(params) {
 export function getRankList(params) {
   return req.get('/live/like/list',params)
 }
+export function getLocationDetail(params) {
+  return Taro.request({
+    url:`https://apis.map.qq.com/ws/geocoder/v1/?location=${params.latitude},${params.longitude}&key=GMNBZ-XZ2CP-2EXD4-LXW4G-S54BE-FDBQP`,
+    method:'GET',
+    responseType:'text'
+  })
+}
+
