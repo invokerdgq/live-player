@@ -23,7 +23,6 @@ if(process.env.TARO_ENV === 'weapp'){
       let statusBarHeight = res.statusBarHeight;
       let Height = statusBarHeight + menuButtonObject.height + (menuButtonObject.top - statusBarHeight)*2;
       Taro.setStorageSync('top',(Height - statusBarHeight)/2 + statusBarHeight)
-
     },
     fail(err) {
       console.log(err);
@@ -78,7 +77,7 @@ useHooks()
     // eslint-disable-next-line react/sort-comp
     componentWillMount () {
       console.log(this.$router.params)
-       entry.entryLaunch(this.$router.params.query)
+      entry.entryLaunch(this.$router.params.query)
       Taro.setKeepScreenOn({
         keepScreenOn: true
       })
@@ -115,7 +114,7 @@ useHooks()
         // 'pages/goodsdetail',
         // 'pages/home/landing',
         // 'pages/category/index',
-        // 'pages/item/list',
+        'pages/item/list',
         'pages/item/espier-detail',
         // 'pages/item/item-params',
         // 'pages/item/package-list',
@@ -172,7 +171,6 @@ useHooks()
         // 'pages/vip/present',
         //
         // 'pages/custom/custom-page',
-
       ],
       subpackages: [
         {
@@ -218,12 +216,21 @@ useHooks()
             //
             // 'pages/member/item-activity',
             // 'pages/member/activity-detail',
-            // 'pages/member/user-info',
+            'pages/member/user-info',
             // 'pages/item/espier-evaluation',
             // 'pages/item/rate',
             // 'pages/item/success',
             //
             // 'pages/wheel/index'
+            'pages/user-store/own-store',
+            'pages/user-store/edit/edit-goods',
+            'pages/user-store/edit/edit-spec',
+            'pages/user-store/store-manage',
+            'pages/user-store/popularize',
+            'pages/user-store/visit-store',
+            'pages/user-store/trade/list',
+            'pages/user-store/trade/delivery',
+            'pages/user-store/trade/trade-detail',
           ]
         },
         {
@@ -232,6 +239,7 @@ useHooks()
             'pages/live/live',
             'pages/live/live-watcher',
             'pages/live/store',
+            // 'pages/live/webGl'
             // 'pages/home/license',
             // 'pages/protocol/privacy',
             // 'pages/exchange/exchange',

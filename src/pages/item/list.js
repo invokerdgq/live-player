@@ -10,7 +10,12 @@ import NavGap from "../../components/nav-gap/nav-gap";
 
 import './list.scss'
 
-
+@connect(({liveGoods}) => ({
+  flatGoods:liveGoods.flatGoods
+}),(dispatch) =>({
+  setFlat:(arr) => dispatch({type:'liveGoods/setFlat',payload:arr}),
+  clearFlat:() => dispatch({type:'liveGoods/clearFlat'}),
+}))
 @connect(({
   member
 }) => ({
@@ -24,6 +29,8 @@ export default class List extends Component {
 
     this.state = {
       ...this.state,
+      is_live:false,
+      chooseList:[],
       curFilterIdx: 0,
       curTagId: '',
       filterList: [
@@ -42,12 +49,15 @@ export default class List extends Component {
       info: {}
     }
   }
+componentWillMount() {
+    this.state.chooseList = JSON.parse(JSON.stringify(this.props.flatGoods))
+}
 
   componentDidMount () {
-    Taro.M(this)
-    const { cat_id = null, main_cat_id = null } = this.$router.params
+    const { cat_id = null, main_cat_id = null,is_live = false } = this.$router.params
     this.firstStatus = true
     this.setState({
+      is_live:is_live,
       query: {
         keywords: this.$router.params.keywords,
         item_type: 'normal', // 普通商品 药物
@@ -55,8 +65,8 @@ export default class List extends Component {
         approve_status: 'onsale,only_show',
         category: cat_id ? cat_id : '',
         main_category: main_cat_id ? main_cat_id : ''
-			},
-			curTagId:this.$router.params.tag_id // 标签id
+      },
+      curTagId:this.$router.params.tag_id // 标签id
     }, () => {
       this.nextPage()
     })
@@ -99,6 +109,15 @@ export default class List extends Component {
       is_fav: ({ item_id }) => Boolean(favs[item_id]),
       rebate_commission: ({rebate_commission}) => rebate_commission
     })
+    if(this.state.is_live && this.state.chooseList.length !== 0){
+      this.state.chooseList.map((item,index) => {
+        nList.forEach((item1) => {
+          if(item1.item_id === item.item_id){
+            item1.is_live = true
+          }
+        })
+      })
+    }
     this.setState({
       list: [...this.state.list, ...nList],
       // showDrawer: false,
@@ -182,7 +201,23 @@ export default class List extends Component {
     })
   }
 
-  handleClickItem = (item) => {                                              //点击单个项目 回调
+  handleClickItem = (item,index) => {                                              //点击单个项目 回调
+    if(this.state.is_live){
+      if(this.state.list[index].is_live){
+        this.state.list[index].is_live = false
+        this.state.chooseList = this.state.chooseList.filter(item => {
+          return item.item_id !=this.state.list[index].item_id
+        })
+      }else{
+        this.state.list[index].is_live = true
+        this.state.chooseList.push(this.state.list[index])
+      }
+      this.setState({
+        list:this.state.list,
+        chooseList:this.state.chooseList
+      })
+      return
+    }
     const url = `/pages/item/espier-detail?id=${item.item_id}`
     Taro.navigateTo({
       url
@@ -320,7 +355,11 @@ export default class List extends Component {
       })
     })
 	}
-
+  confirmChoose(){
+    this.props.setFlat(this.state.chooseList)
+    // update goods
+    Taro.navigateBack()
+  }
   render () {
     const {
       list,
@@ -337,7 +376,8 @@ export default class List extends Component {
       curTagId,
 			info,
       isShowSearch,
-      query
+      query,
+      is_live
     } = this.state
 
 		return (
@@ -440,14 +480,20 @@ export default class List extends Component {
           >
             <View className={`goods-list goods-list__type-${listType}`}>
               {
-                list.map(item => {
+                list.map((item,index) => {
                   return (
                     <View className='goods-list__item'>
                       <GoodsItem
                         key={item.item_id}
                         info={item}
-                        onClick={() => this.handleClickItem(item)}
+                        onClick={() => this.handleClickItem(item,index)}
                       />
+                      {
+                        item.is_live&&
+                        <View className='opacity-bg'>
+                          <Text className='dec'>已选中</Text>
+                        </View>
+                      }
                     </View>
                   )
                 })
@@ -469,6 +515,14 @@ export default class List extends Component {
             onClick={this.scrollBackToTop}
             bottom={30}
           />
+          {
+            is_live&&
+            <View className='choose-confirm'>
+              <View className='choose-dec'>已选<Text className='num'>{this.state.chooseList.length}</Text>件商品</View>
+              <View className='choose-cancel' onClick={() => {Taro.navigateBack()}}>取消</View>
+              <View className='choose-ready' onClick={this.confirmChoose.bind(this)}>确认</View>
+            </View>
+          }
         </View>
       </View>
 

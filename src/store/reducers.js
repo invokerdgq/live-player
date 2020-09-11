@@ -10,6 +10,8 @@ import step from './step'
 import passenger from "./is_passenger";
 import liveConfig from "./live-config";
 import roomConfig from "./room-config";
+import liveGoods from "./live-goods";
+import editSpec from "./goods-spec";
 
 export default combineReducers({
   cart,
@@ -22,5 +24,7 @@ export default combineReducers({
   step,
   passenger,
   liveConfig,
-  roomConfig
+  roomConfig,
+  liveGoods,
+  editSpec
 })

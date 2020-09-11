@@ -293,7 +293,8 @@ export default class GoodsBuyPanel extends Component {
           num,
           distributor_id,
           shop_type: isDrug ? 'drug' : 'distributor',
-          reference:this.props.room_id
+          reference:this.props.room_id,
+          is_user_shop:this.props.is_user_shop
 				})
 				Taro.showToast({
 					title: '成功加入购物车',
@@ -309,7 +310,6 @@ export default class GoodsBuyPanel extends Component {
 
       this.props.onAddCart(item_id, num)
     }
-
 
     if (type === 'fastbuy') {
       url += `?cart_type=fastbuy&shop_id=${distributor_id}`
@@ -332,7 +332,8 @@ export default class GoodsBuyPanel extends Component {
         await api.cart.fastBuy({
           item_id,
           num,
-          reference:this.props.room_id
+          reference:this.props.room_id,
+          is_user_shop:this.props.is_user_shop
         })
       } catch (e) {
        Taro.showToast({

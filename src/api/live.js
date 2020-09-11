@@ -44,4 +44,12 @@ export function getLocationDetail(params) {
     responseType:'text'
   })
 }
-
+export function getGiftList() {
+  return req.get('/live/gift/list')
+}
+export function getDepositList() {
+  return req.get('')
+}
+export function sendGift(params) {
+  return req.post('/live/gift/send',params)
+}

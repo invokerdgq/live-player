@@ -8,6 +8,9 @@ export default class Blank extends Component{
     Taro.navigateTo({
       url:'/others/pages/live/live-watcher?im_id=72853168&uid=GZ212W'
     })
+    // Taro.navigateTo({
+    //   url:'/others/pages/live/webGl'
+    // })
   }
   render() {
     return(

@@ -106,11 +106,13 @@ export default class Live extends Component{
     }
     this.top = Taro.getStorageSync('top')
   }
-  componentWillMount() {
+  async componentWillMount() {
     this.randomGift()
     const im_id = Taro.getStorageSync('im_id')
     this.state.im_id = im_id
     this.state.owner = 1
+    const {operator_id} = await api.store.getOwnShopInfo()
+    Taro.setStorageSync('operator_id',operator_id)
   }
   componentDidShow(){
     Taro.setKeepScreenOn({
@@ -143,6 +145,19 @@ export default class Live extends Component{
       mask:true
     })
     const {memberInfo,vipgrade} = await api.member.memberInfo()
+    this.setState({
+      operatorsopen:memberInfo.operatorsopen,
+      mobile:memberInfo.mobile,
+    })
+    Taro.setStorageSync('userinfo',{
+      username: memberInfo.username,
+      avatar: memberInfo.avatar,
+      userId: memberInfo.user_id,
+      user_card_code:memberInfo.user_card_code,
+      inviter_id:memberInfo.inviter_id,
+      is_vip:vipgrade.is_vip,
+      grade_name: vipgrade.grade_name
+    })
     this.setState({
       memberInfo,
       vipgrade
@@ -571,8 +586,35 @@ handleSendMessage = async(e) =>{
       })
     }
   }
-  handleToStore(){
-    Taro.navigateTo({url:'/others/pages/live/store?setting=true'})
+  handleSetFlat(){
+   Taro.navigateTo({url:'/pages/item/list?is_live=true'})
+  }
+  handleSetStore(){
+    if(this.state.operatorsopen != 1){
+      this.openStore('/marketing/pages/user-store/visit-store')
+      return
+    }
+    Taro.navigateTo({url:`/marketing/pages/user-store/visit-store?id=${Taro.getStorageSync('operator_id')}`})
+  }
+  manageStore(){
+  if(this.state.operatorsopen != 1){
+    this.openStore('/marketing/pages/user-store/store-manage')
+    return
+  }
+  Taro.navigateTo({url:'/marketing/pages/user-store/store-manage'})
+  }
+  openStore(redirect){
+    Taro.showModal({
+      title:'您还未开通店铺',
+      content:'免费开通店铺，多种功能任你选',
+      success:(res) => {
+        if(res.confirm){
+          if(!/^[1-9][0-9]{10}$/.test(this.state.mobile)){
+            Taro.navigateTo({url:`/marketing/pages/member/user-info?redirect_url=${redirect}`})
+          }
+        }
+      }
+    })
   }
   render() {
     const {bl,fl,location,likeCount,filterList,liverStatus,showExitChoose,backType,fansList,onlineNum,buyerNick,showGift,current,is_subscribe,loading,fans,likes,groupInfo,ownerInfo,type,msgList,watcherList,onlineList,watcherType,goodsList,pullStreamLink,pushStreamLink,room_status,inputMessage} = this.state
@@ -895,8 +937,13 @@ handleSendMessage = async(e) =>{
                     </View>
                   </ScrollView>
                 </View>
-                <View className='setting-item' onClick={this.handleToStore.bind(this)}>
-                  <View className='item-title'><Text>店铺商品管理</Text><View className='iconfont icon-chakan'/></View>
+                <View className='setting-item' >
+                  <View className='item-title'>直播间商品管理</View>
+                  <View>
+                    <View onClick={this.handleSetFlat.bind(this)}>添加平台商品</View>
+                    <View onClick={this.handleSetStore.bind(this)}>添加小店商品</View>
+                    <View onClick={this.manageStore.bind(this)}>小店管理</View>
+                  </View>
                 </View>
               </View>
           }

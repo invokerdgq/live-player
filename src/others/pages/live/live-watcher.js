@@ -1,5 +1,5 @@
 import Taro, { Component } from '@tarojs/taro'
-import {View, LivePlayer, Input, Text, Image, ScrollView,Button} from "@tarojs/components"
+import {View, LivePlayer, Input, Text, Image, ScrollView,Button,Swiper,SwiperItem} from "@tarojs/components"
 import OwnOpacity from "../../../components/own-opacity/own-opacity"
 import WatcherItem from "./coms/watcher-item";
 import LiveGoodsItem from "./coms/goodsItem";
@@ -36,6 +36,11 @@ export default class LiveWatcher extends Component{
     super(props);
     this.state = {
       ...this.state,
+      imgLeft:330,
+      imgTop:920,
+      animationPic:'',
+      showGiftSelect:false,
+      giftSelectIndex:'',
       owner:0,
       location:'',
       likeCount:[],
@@ -46,14 +51,6 @@ export default class LiveWatcher extends Component{
       numLimit:false,
       buyerNick:'',
       height:0,
-      giftList:[
-        'ax','bbt','dz',
-        'dz1','fd','hb',
-        'hj','lw','nc',
-        'qc','qkl','sd',
-        'sdtg','xg','xx',
-        'zs'
-      ],
       current:'',
       showGift:false,
       is_subscribe:0,
@@ -78,7 +75,6 @@ export default class LiveWatcher extends Component{
     this.top = Taro.getStorageSync('top')
   }
   componentWillMount(){
-    this.randomGift()
   }
   componentDidShow() {
     Taro.setKeepScreenOn({
@@ -94,8 +90,158 @@ export default class LiveWatcher extends Component{
       }
     })
   }
-  componentDidMount() {
+   componentDidMount() {
     this.context = Taro.createLivePusherContext()
+    // const {total_count,list} = await api.live.getGiftList()
+    // const {total_count:depositCount,list:depositList} = await api.live.getDepositList()
+    let list = [
+      {
+        "id": "1",
+      "title": "火箭",
+      "price": 100,
+      "pic": "45645",
+      "is_lock": 0,
+      "created": 1212,
+      "updated": 454564
+    }, {
+        "id": "2",
+        "title": "火箭",
+        "price": 100,
+        "pic": "45645",
+        "is_lock": 0,
+        "created": 1212,
+        "updated": 454564
+      }, {
+        "id": "3",
+        "title": "火箭",
+        "price": 100,
+        "pic": "45645",
+        "is_lock": 0,
+        "created": 1212,
+        "updated": 454564
+      }, {
+        "id": "4",
+        "title": "火箭",
+        "price": 100,
+        "pic": "45645",
+        "is_lock": 0,
+        "created": 1212,
+        "updated": 454564
+      }, {
+        "id": "5",
+        "title": "火箭",
+        "price": 100,
+        "pic": "45645",
+        "is_lock": 0,
+        "created": 1212,
+        "updated": 454564
+      }, {
+        "id": "6",
+        "title": "火箭",
+        "price": 100,
+        "pic": "45645",
+        "is_lock": 0,
+        "created": 1212,
+        "updated": 454564
+      }, {
+        "id": "7",
+        "title": "火箭",
+        "price": 100,
+        "pic": "45645",
+        "is_lock": 0,
+        "created": 1212,
+        "updated": 454564
+      }, {
+        "id": "8",
+        "title": "火箭",
+        "price": 100,
+        "pic": "45645",
+        "is_lock": 0,
+        "created": 1212,
+        "updated": 454564
+      }, {
+        "id": "9",
+        "title": "火箭",
+        "price": 100,
+        "pic": "45645",
+        "is_lock": 0,
+        "created": 1212,
+        "updated": 454564
+      }, {
+        "id": "10",
+        "title": "火箭",
+        "price": 100,
+        "pic": "45645",
+        "is_lock": 0,
+        "created": 1212,
+        "updated": 454564
+      }, {
+        "id": "11",
+        "title": "火箭",
+        "price": 100,
+        "pic": "45645",
+        "is_lock": 0,
+        "created": 1212,
+        "updated": 454564
+      }, {
+        "id": "12",
+        "title": "火箭",
+        "price": 100,
+        "pic": "45645",
+        "is_lock": 0,
+        "created": 1212,
+        "updated": 454564
+      }, {
+        "id": "13",
+        "title": "火箭",
+        "price": 100,
+        "pic": "45645",
+        "is_lock": 0,
+        "created": 1212,
+        "updated": 454564
+      }, {
+        "id": "14",
+        "title": "火箭",
+        "price": 100,
+        "pic": "45645",
+        "is_lock": 0,
+        "created": 1212,
+        "updated": 454564
+      }, {
+        "id": "15",
+        "title": "火箭",
+        "price": 100,
+        "pic": "45645",
+        "is_lock": 0,
+        "created": 1212,
+        "updated": 454564
+      }, {
+        "id": "16",
+        "title": "火箭",
+        "price": 100,
+        "pic": "45645",
+        "is_lock": 0,
+        "created": 1212,
+        "updated": 454564
+      },
+    ]
+     let depositList =[]
+    let gList = []
+     let dList = []
+     let i = 0
+    while (8*i<list.length){
+      i++
+      gList.push(list.slice(8*(i-1),8*i))
+    }
+    let j = 0
+     while (8*j<depositList.length){
+       j++
+       dList.push(depositList.slice(8*(j-1),8*j))
+     }
+    this.setState({
+      giftList:gList,
+      depositList
+    })
   }
 
   componentWillUnmount(){
@@ -140,6 +286,15 @@ export default class LiveWatcher extends Component{
       mask:true
     })
     const {memberInfo,vipgrade} = await api.member.memberInfo()
+    Taro.setStorageSync('userinfo',{
+      username: memberInfo.username,
+      avatar: memberInfo.avatar,
+      userId: memberInfo.user_id,
+      user_card_code:memberInfo.user_card_code,
+      inviter_id:memberInfo.inviter_id,
+      is_vip:vipgrade.is_vip,
+      grade_name: vipgrade.grade_name
+    })
     this.setState({
       memberInfo,
       vipgrade
@@ -179,10 +334,10 @@ export default class LiveWatcher extends Component{
       is_subscribe:is_subscribe,
       goodsList:list
     })
-      api.live.addHistory({
-        room_id:this.state.im_id,
-        source:Taro.getStorageSync('distribution_shop_id')
-      })
+    api.live.addHistory({
+      room_id:this.state.im_id,
+      source:Taro.getStorageSync('distribution_shop_id')
+    })
   }
 
   onShareAppMessage(obj) {
@@ -191,13 +346,6 @@ export default class LiveWatcher extends Component{
       path:`/others/pages/live/live-watcher?im_id=${this.state.im_id}&uid=${this.state.memberInfo.user_card_code}`,
       imageUrl:this.state.groupInfo.avatar
     }
-  }
-
-  randomGift = ()=>{
-    let index = Math.floor(Math.random()*(this.state.giftList.length-1))
-    this.setState({
-      current:this.state.giftList[index]
-    })
   }
 
   statusSend(type){
@@ -411,7 +559,8 @@ export default class LiveWatcher extends Component{
   showData(){
     if(this.state.type !== ''){
       this.setState({
-        type:''
+        type:'',
+        giftSelectIndex:''
       })
     }
   }
@@ -472,10 +621,7 @@ export default class LiveWatcher extends Component{
         }
         break
       case 'gift':
-        Taro.showToast({
-          title:'暂未开放',
-          icon:'none'
-        })
+        this.showMoreDec('gift-detail','')
         break
       default :
         Taro.showToast({
@@ -554,11 +700,63 @@ export default class LiveWatcher extends Component{
       })
     }
   }
-  handleToStore(){
-    Taro.navigateTo({url:'/others/pages/live/store?setting=true'})
+  handleSwiperChange(){
+    this.setState({
+      giftSelectIndex:''
+    })
+  }
+  handleSelectGift(index,e){
+    this.setState({
+      giftSelectIndex:index
+    })
+  }
+  async handleSendGift(id,pic){
+     let uid = this.state.ownerInfo.userID
+     let option = {
+       gift_id:id,
+       receiver_id:uid
+     }
+    this.setState({
+      type:'',
+      animationPic:pic
+    })
+    this.loveAnimation()
+    return
+     const {status} = await api.live.sendGift(option)
+    if(status === 'ok'){
+      this.setState({
+        type:'',
+        animationPic:pic
+      },() => {
+        this.loveAnimation()
+      })
+    }else{
+      Taro.showToast({title:'送礼失败，稍后重试',icon:"none",duration:1000})
+    }
+  }
+  handleDeposit(){
+    this.showMoreDec('deposit-detail','')
+  }
+  loveAnimation(){
+    let time = 0
+
+    let timer = setInterval(() => {
+       this.setState({
+         imgLeft:260*Math.sin(time/1000)*(1+Math.cos(time/1000)) +330,
+         imgTop:260*(1+Math.cos(time/1000))*Math.cos(time/1000)+ 400
+       })
+      if(time > 3.1416 * 1000 * 2) {
+        clearInterval(timer)
+        this.setState({
+          animationPic:''
+        })
+      }
+      time += 100
+    },100)
+
   }
   render() {
-    const {location,likeCount,filterList,liverStatus,showExitChoose,backType,fansList,onlineNum,buyerNick,showGift,current,is_subscribe,loading,fans,likes,groupInfo,ownerInfo,type,msgList,watcherList,onlineList,watcherType,goodsList,pullStreamLink,pushStreamLink,room_status,inputMessage} = this.state
+    const {imgLeft,imgTop,animationPic,giftSelectIndex,giftList,location,likeCount,filterList,liverStatus,showExitChoose,backType,fansList,onlineNum,buyerNick,showGift,current,is_subscribe,loading,fans,likes,groupInfo,ownerInfo,type,msgList,watcherList,onlineList,watcherType,goodsList,pullStreamLink,pushStreamLink,room_status,inputMessage} = this.state
     let newList
     let len = this.state.msgList.length
     if(watcherType === 'com'){
@@ -584,7 +782,7 @@ export default class LiveWatcher extends Component{
                   liverStatus === 'PAUSE'?
                     <View className='outline-live'>主播暂时离开</View>:
                     <View className='outline-live'>主播已下线</View>:
-                <View className='outline-live'>主播还未开播</View>
+                    <View className='outline-live'>主播还未开播</View>
           }
         </View>
         <View className='data-view' onClick={this.showData.bind(this)}>
@@ -698,7 +896,8 @@ export default class LiveWatcher extends Component{
                 <View className={`more-item order-3`}>
                   <View className='container'/>
                   <View className='like' onClick={this.clickBtn.bind(this,'gift')}><Image src={`${cdn}/like.png`} mode='widthFix' className='like-img'/></View>
-                  {showGift &&
+                  {
+                    showGift &&
                   <Image src={`${cdn}/${current}.png`} className='img' mode='widthFix' onAnimationEnd={this.animationEnd.bind(this)} style={{zIndex:'100000000'}}/>
                   }
                 </View>
@@ -720,6 +919,86 @@ export default class LiveWatcher extends Component{
               </View>
             </View>
           </View>
+          }
+          {
+            type === 'deposit-detail'&&
+              <View className='deposit-detail' onClick={this.stop}>
+                 <View className='user-info-deposit'>
+                   <View className='cash-dec'><Text>余额:</Text><View className='iconfont icon-jinbi'/><Text>{11}</Text></View>
+                   <View className='deposit-dec'>充值</View>
+                 </View>
+                <View className='deposit-list'>
+                  <Swiper
+                    className='gift-swiper'
+                    indicatorDots={true}
+                    indicatorActiveColor='#c0534e'
+                    indicatorColor='gray'
+                    onChange={this.handleSwiperChange.bind(this)}
+                  >
+                    {
+
+                    }
+                    </Swiper>
+                </View>
+              </View>
+          }
+          {
+           type === 'gift-detail' &&
+             <View className='gift-detail' onClick={this.stop}>
+               <View className='user-info-cash'>
+                <View className='cash-dec'><Text>余额:</Text><View className='iconfont icon-jinbi'/><Text>{11}</Text></View>
+                <View className='deposit' onClick={this.handleDeposit.bind(this)}>充值 ></View>
+               </View>
+               <View className='gift-send-out'>
+                <Swiper
+                  className='gift-swiper'
+                  indicatorDots={true}
+                  indicatorActiveColor='#c0534e'
+                  indicatorColor='white'
+                  onChange={this.handleSwiperChange.bind(this)}
+                >
+                  {
+                    giftList.map((item,index)=> {
+                      return(
+                        <SwiperItem >
+                          <View className='sp-item'>
+                            {
+                              item.map((gitem,gindex) => {
+                                return(
+                                  <View style={{marginTop:giftSelectIndex === gindex?'20rpx':'38rpx'}}>
+                                        <View  className='gift-item-container' key={gitem.id} onClick={this.handleSelectGift.bind(this,gindex)}>
+                                          <View className='gift-img'><Image mode='widthFix' className='img' src={gitem.pic}/></View>
+                                          <View className='gift-name'>
+                                            {gitem.title}
+                                          </View>
+                                          <View  className='gift-price'>
+                                            {gitem.price}金币
+                                          </View>
+                                          {
+                                            giftSelectIndex === gindex &&
+                                              <View className='gift-selected'>
+                                                <View className='gift-img-selected'><Image mode='widthFix' className='img' src={gitem.pic}/></View>
+                                                <View  className='gift-price-selected'>
+                                                  {gitem.price}金币
+                                                </View>
+                                                <View className='gift-name-selected' onClick={this.handleSendGift.bind(this,gitem.id,gitem.pic)}>
+                                                  发送
+                                                </View>
+                                              </View>
+                                          }
+                                        </View>
+                                  </View>
+                                )
+                              })
+                            }
+                          </View>
+                        </SwiperItem>
+                      )
+                    })
+                  }
+                </Swiper>
+               </View>
+             </View>
           }
           {
             type === 'live-detail'&&
@@ -823,6 +1102,10 @@ export default class LiveWatcher extends Component{
                 </ScrollView>
               </View>
             </View>
+          }
+          {
+            animationPic &&
+              <Image mode='widthFix' className='ani-img' src={animationPic} id={'ani'} style={{left:imgLeft+'rpx',top:imgTop + 'rpx'}}/>
           }
         </View>
       </View>
