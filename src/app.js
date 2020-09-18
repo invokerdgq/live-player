@@ -238,7 +238,7 @@ useHooks()
           pages: [
             'pages/live/live',
             'pages/live/live-watcher',
-            'pages/live/store',
+            'pages/live/live-store',
             // 'pages/live/webGl'
             // 'pages/home/license',
             // 'pages/protocol/privacy',

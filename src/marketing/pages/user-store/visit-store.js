@@ -5,12 +5,24 @@ import { FilterBar } from "../../../components";
 import NavGap from "../../../components/nav-gap/nav-gap";
 import { withPager } from "../../../hocs";
 import './visit-store.scss'
+import {connect} from "@tarojs/redux";
+import {tls,TLS} from "../../../hocs/withTim";
+
+@connect(({liveGoods}) => ({
+  flatGoods:liveGoods.flatGoods,
+  storeGoods:liveGoods.storeGoods,
+  name:liveGoods.name,
+  face_url:liveGoods.face_url
+}),(dispatch) =>({
+  setStore:(arr) => dispatch({type:'liveGoods/setStore',payload:arr}),
+}))
 @withPager
 export default class VisitStore extends Component{
   constructor(props) {
     super(props);
     this.state = {
       ...this.state,
+      chooseList:[],
       curFilterIdx:0,
       filterList: [
         { title:'综合排序'},
@@ -25,9 +37,16 @@ export default class VisitStore extends Component{
       goodsList:[]
     }
   }
- componentDidMount() {
-    const {id} = this.$router.params
-   this.fetchBaseInfo(id)
+  componentWillMount() {
+    this.state.chooseList = JSON.parse(JSON.stringify(this.props.storeGoods))
+  }
+
+  componentDidMount() {
+    const {id,is_live} = this.$router.params
+    this.setState({
+      is_live:!!is_live
+    })
+    this.fetchBaseInfo(id)
     this.nextPage()
 }
 
@@ -66,6 +85,15 @@ fetch =async (params) =>{
     }
     let total
     const {list,total_count} = await api.item.search(option)
+  if(this.state.is_live && this.state.chooseList.length !== 0){
+    this.state.chooseList.map(item => {
+      list.forEach(item1 => {
+        if(item1.item_id === item.item_id){
+          item1.is_live = true
+        }
+      })
+    })
+  }
     this.setState({
       goodsList:[...this.state.goodsList,...list]
     })
@@ -101,11 +129,36 @@ fetch =async (params) =>{
       query:e.detail.value
     })
   }
-  handleDetail(id){
+  handleDetail(id,index){
+    if(this.state.is_live){
+      if(this.state.goodsList[index].is_live){
+        return
+      }else{
+        this.state.goodsList[index].is_live = true
+        this.state.chooseList.unshift(this.state.goodsList[index])
+      }
+      this.setState({
+        goodsList:this.state.goodsList,
+        chooseList:this.state.chooseList
+      })
+      return
+    }
     Taro.navigateTo({url:`/pages/item/espier-detail?id=${id}&operator_id=${this.$router.params.id}`})
   }
+  async confirmChoose(){
+    this.props.setStore(this.state.chooseList)
+    const res = await api.live.postConfig({
+      name:this.props.name,
+      face_url:this.props.face_url,
+      products:JSON.stringify({flatGoods:this.props.flatGoods,storeGoods:this.props.storeGoods})
+    })
+    if(tls ){
+      tls.sendCustomMsgAndEmitEvent(TLS.EVENT.ADD_GOODS,'add')
+    }
+    Taro.navigateBack()
+  }
   render() {
-    const {goodsList,curFilterIdx,filterList,query,avatar,ownername} = this.state
+    const {is_live,goodsList,curFilterIdx,filterList,query,avatar,ownername} = this.state
     return(
       <View className='store'>
         <NavGap title='店铺详情'/>
@@ -139,7 +192,7 @@ fetch =async (params) =>{
                    {goodsList.length !==0?
                      goodsList.map((item,index) => {
                        return(
-                         <View className='item-container' onClick={this.handleDetail.bind(this,item.item_id)}>
+                         <View className='item-container' onClick={this.handleDetail.bind(this,item.item_id,index)}>
                            <View className='img-container'>
                              <Image mode='widthFix' className='img' src={item.pics[0]}/>
                            </View>
@@ -147,6 +200,12 @@ fetch =async (params) =>{
                              <View className='goods-name'>{item.item_name}</View>
                              <View className='goods-price'><Text className='inner'>￥{Number(item.price)/100}</Text><Text className='sale-count'>已售{item.fictitious_sales}件</Text></View>
                            </View>
+                           {
+                             item.is_live&&
+                             <View className='opacity-bg'>
+                               <Text className='dec'>已选中</Text>
+                             </View>
+                           }
                          </View>
                        )
                      }):
@@ -156,6 +215,14 @@ fetch =async (params) =>{
                </ScrollView>
              </View>
            </View>
+          {
+            is_live&&
+            <View className='choose-confirm'>
+              <View className='choose-dec'>已选<Text className='num'>{this.state.chooseList.length}</Text>件商品</View>
+              <View className='choose-cancel' onClick={() => {Taro.navigateBack()}}>取消</View>
+              <View className='choose-ready' onClick={this.confirmChoose.bind(this)}>确认</View>
+            </View>
+          }
         </View>
       </View>
     )

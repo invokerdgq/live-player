@@ -50,9 +50,9 @@ export default class Reg extends Component {
       head_portrait:this.state.info.avatar
     }
     const data = await api.store.openStore(option)
-    if(!data.errMsg){
+    if(data.operator_id){
       Taro.setStorageSync('operator_id',data.operator_id)
-      Taro.navigateTo({url:`${redirect_url}?id=${data.operator_id}`})
+      Taro.navigateTo({url:`${redirect_url}?id=${data.operator_id}&is_live=true`})
     }else{
       Taro.showToast({title:data.errMsg || '出现错误，请稍后重试',icon:'none'})
     }

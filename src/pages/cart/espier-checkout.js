@@ -860,8 +860,7 @@ handleExchange = async () => {
       if (payErr.errMsg.indexOf('fail cancel') >= 0) {
         setTimeout(() => {
           Taro.redirectTo({
-            // url: `/pages/trade/detail?id=${order_id}`
-            url:'/others/pages/live/live'
+            url: `/pages/trade/detail?id=${order_id}`
           })
         },1500)
       }

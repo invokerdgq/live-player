@@ -41,8 +41,8 @@ export function updateGoodsInfo(params){
 export function updateItemRebateConf(params) {
   return req.post('/goods/shop/rebateconf',params)
 }
-export function getOwnShopInfo() {
-  return req.get('/usershops/ownshops')
+export function getOwnShopInfo(query) {
+  return req.get('/usershops/ownshops',query,{ showError: false })
 }
 export function getTradeList(params) {
  return req.get('/usershops/orders',params)

@@ -8,6 +8,39 @@ page{
   padding-top:VH($navigate-height);
   display: flex;
   flex-direction: column;
+  .choose-confirm{
+    height: 80px;
+    position: fixed;
+    bottom: 0;
+    width: 750px;
+    display: flex;
+    align-items: center;
+    padding: 10px 30px;
+    z-index:10000;
+    background: white;
+    .choose-dec{
+      .num{
+        color: $color-theme;
+        margin: 0 10px;
+        font-size: 32px;
+      }
+    }
+    .choose-ready,.choose-cancel{
+      margin-left: 30px;
+      height: 60px;
+      padding: 0 25px;
+      border-radius: 10px;
+      text-align: center;
+      line-height: 60px;
+      color: white;
+      background: $color-theme;
+    }
+    .choose-cancel{
+      margin-left: auto;
+      color: white;
+      background: gray;
+    }
+  }
   .user-dec{
     flex:none;
     display: flex;
@@ -88,6 +121,7 @@ page{
           flex-wrap: wrap;
           justify-content: space-between;
           .item-container{
+            position: relative;
             border-radius: 10px;
             margin-bottom: 22px;
             width: 333px;
@@ -96,6 +130,12 @@ page{
             flex-direction: column;
             background: white;
             box-shadow:0 0 6px rgba(0, 0, 0, .04) ;
+            .opacity-bg{
+              position: absolute;
+              top:50%;
+              left:50%;
+              transform: translate(-50%,-50%);
+            }
             .img-container{
               width: 100%;
               height: 333px;
@@ -138,4 +178,18 @@ page{
     color: #A9A9A9;
     margin: 200px auto;
   }
+}
+.opacity-bg{
+  position: absolute;
+  width: 30%;
+  height: 30%;
+  border-radius: 20px;
+  background: rgba(0,0,0,0.3);
+  color:white;
+  top:50%;
+  left:50%;
+  transform: translate(-50%,-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

@@ -42,16 +42,20 @@ async function entryLaunch(data, isNeedLocate) {
   }
 
   // 如果需要定位,并且店铺无效，
-  if (!dtidValid) {
-    store = await getLocal(isNeedLocate)
-
-  }
+  // if (!dtidValid) {
+  //   store = await getLocal(isNeedLocate)
+  //
+  // }
 
   if (!store.status) {
     options.store = store
     options.dtid = store.distributor_id
   }
-
+  if(options.user_id){ // 用户店铺商品 分享者uid
+    const userinfo = Taro.getStorageSync('userinfo')
+    if(options.user_id && userinfo.userId != options.user_id)
+      Taro.setStorageSync('user_id',options.user_id)
+  }
   if (options.uid) {
     // 如果分享带了会员ID 那么
     Taro.setStorageSync('distribution_shop_id', options.uid)
@@ -64,10 +68,10 @@ async function entryLaunch(data, isNeedLocate) {
     trackViewNum(options.m, options.s)
   }
 
-  if(options.i){
+  if(options.a){
     Taro.setStorageSync('inviteCode', options.a)
   }
-  if(options.a){
+  if(options.i){
     Taro.setStorageSync('distribution_shop_id', options.i)
   }
   return options

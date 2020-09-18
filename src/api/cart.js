@@ -17,14 +17,15 @@ export function add (params) {
 }
 
 export function fastBuy (params) {
-  const { item_id, num = 1,reference } = params
+  const { item_id, num = 1,reference ,is_user_shop} = params
   return req.post('/cart', {
     cart_type: 'fastbuy',
     item_id,
     num,
     reference:reference,
     isAccumulate: false,
-    shop_type: 'distributor'
+    shop_type: 'distributor',
+    is_user_shop
   })
 }
 

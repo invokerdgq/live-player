@@ -1,6 +1,6 @@
 import TLS from './tls.min'
 import TIM from './tim-wx'
-import Taro from "@tarojs/taro";
+import Taro from '@tarojs/taro'
 
 let tls
 export default function WithTim (component) {
@@ -92,7 +92,15 @@ export default function WithTim (component) {
     tls.on(TLS.EVENT.CANCELATTENTION, async(data) => {
       this.handleWatchTim('CancelAttention',data)
     })
-  }
 
+    tls.on(TLS.EVENT.SEND_GIFT,async (data) =>{
+      this.handleWatchTim('SendGift',data)
+    })
+
+    tls.on(TLS.EVENT.ADD_GOODS, async(data) => {
+      this.handleWatchTim('AddGoods',data)
+    })
+  }
   }
 }
+export {tls,TLS}

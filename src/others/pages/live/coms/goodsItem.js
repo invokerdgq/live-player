@@ -8,6 +8,11 @@ export default class LiveGoodsItem extends Component{
   static options= {
     addGlobalClass:true
   }
+  static defaultProps = {
+    info:{
+      img:'',
+    }
+  }
   constructor(props) {
     super(props);
   }
@@ -16,7 +21,7 @@ export default class LiveGoodsItem extends Component{
     return(
       <View className='live-goods-item'>
         <View className='goods-img'>
-          <Image mode='widthFix' className='img' src={info.img}/>
+          <Image mode='widthFix' className='img' src={info.img || info.pics[0]}/>
           <View className='order-contain'>
             <OwnOpacity
               contain-class={'contain-order'}
@@ -31,10 +36,9 @@ export default class LiveGoodsItem extends Component{
           </View>
         </View>
         <View className='goods-dec'>
-          <Text className='goods_name'>{info.title}</Text>
-          {/*<View className='more'>规格卖点</View>*/}
+          <Text className='goods_name'>{info.title || info.item_name}</Text>
           <View className='goods-footer'>
-            <View className='goods-price'>￥{info.price}</View>
+            <View className='goods-price'>￥{info.img ?info.price:(Number(info.price)/100).toFixed(2)}</View>
             <View className='buy'>马上抢</View>
           </View>
         </View>

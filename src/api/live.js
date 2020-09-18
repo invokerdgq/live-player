@@ -48,8 +48,26 @@ export function getGiftList() {
   return req.get('/live/gift/list')
 }
 export function getDepositList() {
-  return req.get('')
+  return req.get('/live/gift/coin')
 }
 export function sendGift(params) {
   return req.post('/live/gift/send',params)
+}
+export function getGiftCoin() {
+  return req.get('/live/gift/coin')
+}
+export function getCoinSurplus() {
+  return req.get('/live/gift/coin/mine')
+}
+export function buyCoin(params) {
+ return req.post('/live/gift/buy',params)
+}
+export function uploadImg(params,config) {
+  return req.post('/espier/upload',params,config)
+}
+export function postConfig(params) {
+  return req.post('/live/config',params)
+}
+export function getConfig() {
+  return req.get('/live/config',{} ,{ showError: false })
 }

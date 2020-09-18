@@ -1,5 +1,5 @@
-import Taro, { Component } from '@tarojs/taro'
 import { View, Text } from '@tarojs/components'
+import Taro, { Component } from '@tarojs/taro'
 import { connect } from '@tarojs/redux'
 import { AtButton } from 'taro-ui'
 import api from '@/api'
@@ -19,19 +19,18 @@ import './wxauth.scss'
 }))
 
 export default class WxAuth extends Component {
-  state = {
-    isAuthShow: false
+  constructor(props) {
+    super(props);
+    this.state = {
+      isAuthShow: false
+    }
+  }
+  componentWillMount() {
+    console.log('跳转  授权页面',JSON.stringify(this.$router.params))
   }
 
-  componentDidShow () {
-    const extraData = Taro.getStorageSync('extraData')
-    if(extraData && extraData.token && extraData.path){
-      Taro.setStorageSync('auth_token',extraData.token)
-      Taro.navigateTo({
-        url:extraData.path
-      })
-      return
-    }
+  componentDidMount () {
+    console.log(this.$router,'iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii')
     this.autoLogin()
   }
 
@@ -40,7 +39,7 @@ export default class WxAuth extends Component {
     const { code } = await Taro.login()
     try {
       const { token } = await api.wx.login({ code })
-      if (!token) throw new Error(`token is not defined: ${token}`)
+      if (!token) {throw new Error(`token is not defined: ${token}`) }
       S.setAuthToken(token)
       if(update == 1){
         this.setState({
@@ -48,7 +47,7 @@ export default class WxAuth extends Component {
         })
         return
       }
-      return this.redirect()
+      // return this.redirect()
     } catch (e) {
       console.log(e)
       this.setState({
@@ -59,6 +58,7 @@ export default class WxAuth extends Component {
 
   redirect () {
     const redirect = this.$router.params.redirect
+    console.log('redirect--------------------',redirect)
     Taro.M(decodeURIComponent(redirect))
     let redirect_url = ''
     if(Taro.getStorageSync('isqrcode') === 'true') {
@@ -82,7 +82,8 @@ export default class WxAuth extends Component {
         user_card_code:res.memberInfo.user_card_code,
         inviter_id:res.memberInfo.inviter_id,
         is_vip:res.vipgrade.is_vip,
-        vip_grade:res.vipgrade.vip_grade_id
+        vip_grade:res.vipgrade.vip_grade_id,
+        operatorsopen:res.memberInfo.operatorsopen
       })
       console.log('url',redirect_url)
       Taro.redirectTo({
@@ -141,10 +142,10 @@ export default class WxAuth extends Component {
         S.setAuthToken(token)
         this.props.changePassenger(false)
         setTimeout(() => {
-          Taro.navigateBack()
+          Taro.redirectTo({url:this.$router.params.redirect})
         },500)
+        return
       }
-    return
     }catch (e) {
       Taro.navigateToMiniProgram({
         appId:'wx9378bcb903abd3ab',
@@ -159,6 +160,7 @@ export default class WxAuth extends Component {
       })
       return
     }
+    return
     Taro.showLoading({
       mask: true,
       title: '正在加载...'
@@ -246,7 +248,7 @@ export default class WxAuth extends Component {
                   lang='zh_CN'
                   customStyle={`background: ${colors.data[0].primary}; border-color: ${colors.data[0].primary}`}
                   openType='getUserInfo'
-                  // onClick={this.handleNews.bind(this)}
+                  onClick={this.handleNews.bind(this)}
                   onGetUserInfo={this.handleGetUserInfo.bind(this)}
                 >授权允许</AtButton>
                 <AtButton className='back-btn' type='default' onClick={this.handleBackHome.bind(this)}>拒绝</AtButton>

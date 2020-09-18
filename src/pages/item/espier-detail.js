@@ -42,6 +42,10 @@ export default class Detail extends Component {
 
     this.state = {
       ...this.state,
+      shopInfo:{
+        username:'',
+        head_portrait:''
+      },
       showCopy:false,
       marketing: 'normal',
       info: null,
@@ -73,7 +77,8 @@ export default class Detail extends Component {
       showCodeInput:false,
       cardValue:'',
       top:0,
-      is_exchange:false
+      is_exchange:false,
+      is_seckill: 0
     }
   }
 
@@ -83,9 +88,16 @@ export default class Detail extends Component {
       top:top
     })
     const options = this.$router.params
-    if(options.source === 'exchange'){ // 来源于兑换
+    // 来源于兑换
+    if(options.source === 'exchange'){
       this.setState({
         is_exchange:true
+      })
+    }
+    // 是秒杀品
+    if(options.is_seckill == 1){
+      this.setState({
+        is_seckill:1
       })
     }
     const { store, uid, id, gid = '' } = await entry.entryLaunch(options, true)
@@ -113,8 +125,9 @@ export default class Detail extends Component {
   }
 
   async componentDidShow () {
+    const {operator_id,} = this.$router.params
     const userInfo = Taro.getStorageSync('userinfo')
-    if (S.getAuthToken() && !userInfo) {
+    if (S.getAuthToken() && (!userInfo || userInfo.user_card_code)) {
       const res = await api.member.memberInfo()
       const userObj = {
         username: res.memberInfo.username,
@@ -123,11 +136,29 @@ export default class Detail extends Component {
         isPromoter: res.is_promoter,
         userCode:res.user_card_code,
         is_vip:res.vipgrade.is_vip,
-        user_card_code:res.user_card_code,
+        user_card_code:res.memberInfo.user_card_code,
         inviter_id:res.memberInfo.inviter_id
       }
       Taro.setStorageSync('userinfo', userObj)
     }
+    if(operator_id && operator_id !== ''){
+      api.store.getShopInfo(operator_id).then((res) => {
+        this.setState({
+          shopInfo:res
+        })
+      })
+    }
+    if(operator_id && this.$router.params.uid && S.getAuthToken()){
+      try{
+        api.item.bindShop({
+          operator_id,
+          user_card_code: this.$router.params.uid
+        })
+      }catch(e){
+        console.log(e)
+      }
+    }
+    entry.entryLaunch(this.$router.params)
     this.fetchCartCount()
     // this.getEvaluationList()                          -------------------------------请求 出错 暂时注释
   }
@@ -151,12 +182,12 @@ export default class Detail extends Component {
   onShareAppMessage () {
     const { info } = this.state
     const { distributor_id } = Taro.getStorageSync('curStore')
-    const { user_card_code :userId} = Taro.getStorageSync('userinfo')
+    const { user_card_code :userId,userId:user_id} = Taro.getStorageSync('userinfo')
 
-
+    console.log(`/pages/item/espier-detail?id=${info.item_id}&dtid=${distributor_id}`+(userId && '&uid=' + userId)+(this.$router.params.operator_id && '&operator_id=' + this.$router.params.operator_id)+(user_id && '&user_id=' + user_id))
     return {
-      title: info.item_name,
-      path: '/pages/item/espier-detail?id='+ info.item_id + '&dtid=' + distributor_id + (userId && '&uid=' + userId)
+      title: this.state.shopInfo.username?`${this.state.shopInfo.username}的小店` : info.item_name,
+      path: `/pages/item/espier-detail?id=${info.item_id}&dtid=${distributor_id}`+(userId && '&uid=' + userId)+(this.$router.params.operator_id && '&operator_id=' + this.$router.params.operator_id)+(user_id && '&user_id=' + user_id)
     }
 
   }
@@ -185,7 +216,7 @@ export default class Detail extends Component {
       id = this.$router.params.id
     }
     let { distributor_id } = Taro.getStorageSync('curStore')
-     const {assist_id,level} = this.$router.params
+    const {assist_id,level} = this.$router.params
     const info = await api.item.detail(id, {goods_id: goodsId, distributor_id ,level,assist_id})
     const { intro: desc, promotion_activity: promotion_activity } = info
     let marketing = 'normal'
@@ -278,7 +309,6 @@ export default class Detail extends Component {
       }else {
         contentDesc = desc
       }
-      console.log(contentDesc)
       let promotion_package = null
       const { list } = await api.item.packageList({item_id: id})  // 暂时 不清楚 含义
       if (list.length) {
@@ -414,14 +444,14 @@ export default class Detail extends Component {
       }, 2000)
       return
     }
-   if(this.$router.params.level && type === 'cart'){
-     Taro.showToast({
-       title:'助力产品不能加入购物车',
-       icon:'none',
-       duration:1500
-     })
-     return;
-   }
+    if(this.$router.params.level && type === 'cart'){
+      Taro.showToast({
+        title:'助力产品不能加入购物车',
+        icon:'none',
+        duration:1500
+      })
+      return;
+    }
     this.setState({
       showBuyPanel: true, // 购买时底部弹窗
       buyPanelType: type,
@@ -508,26 +538,25 @@ export default class Detail extends Component {
     const { info } = this.state
     const { pics, company_id, item_id } = info
     const host = req.baseURL.replace('/api/h5app/wxapp/','')
-    const extConfig = wx.getExtConfigSync ? wx.getExtConfigSync() : {}
+    const extConfig = process.env.TARO_ENV === 'h5'?{}:Taro.getExtConfigSync ? Taro.getExtConfigSync() : {}
     const { distributor_id } = Taro.getStorageSync('curStore')
-    const pic = pics[2].replace('http:', 'https:')
+    const pic = pics[0].replace('http:', 'https:')
 
-    const wxappCode = `${host}/wechatAuth/wxapp/qrcode?page=pages/item/espier-detail&appid=${extConfig.appid}&company_id=${company_id}&id=${item_id}&dtid=${distributor_id}&uid=${userId}`
+    const wxappCode = `${host}/wechatAuth/wxapp/qrcode?page=pages/item/espier-detail&appid=${extConfig?extConfig.appid:''}&company_id=${company_id}&id=${item_id}&dtid=${distributor_id}&uid=${userId}`
 
-    const avatarImg = await Taro.getImageInfo({src: avatar})
+    const avatarImg = await Taro.getImageInfo({src: avatar.replace('http:', 'https:')})
     const goodsImg = await Taro.getImageInfo({src: pic})
-    const codeImg = await Taro.getImageInfo({src: wxappCode})
+    const codeImg = await Taro.getImageInfo({src: wxappCode.replace('http:', 'https:')})
     if (avatarImg && goodsImg && codeImg) {
       const posterImgs = {
         avatar: avatarImg.path,
         goods: goodsImg.path,
         code: codeImg.path
       }
-
       await this.setState({
         posterImgs
       }, () => {
-        this.drawImage()
+        this.drawImage(goodsImg.width,goodsImg.height)
       })
       return posterImgs
     } else {
@@ -535,14 +564,14 @@ export default class Detail extends Component {
     }
   }
 
-  drawImage = () => {
+  drawImage = (w,h) => {
     const { posterImgs } = this.state
     if (!posterImgs) return
     const { avatar, goods, code } = posterImgs
     const { info } = this.state
     const { item_name, act_price = null, member_price = null, price, market_price } = info
     //let mainPrice = act_price ? act_price : member_price ? member_price : price
-    let mainPrice = act_price ? act_price : price
+    let mainPrice = act_price ? act_price :member_price?member_price: price
     let sePrice = market_price
     mainPrice = (mainPrice/100).toFixed(2)
     if (sePrice) {
@@ -556,14 +585,14 @@ export default class Detail extends Component {
       lineThrough: false,
       valign: 'bottom'
     },
-    {
-      text: mainPrice,
-      size: 24,
-      color: '#ff5000',
-      bold: true,
-      lineThrough: false,
-      valign: 'bottom'
-    }]
+      {
+        text: mainPrice,
+        size: 24,
+        color: '#ff5000',
+        bold: true,
+        lineThrough: false,
+        valign: 'bottom'
+      }]
     if (sePrice) {
       prices.push({
         text: sePrice,
@@ -581,8 +610,7 @@ export default class Detail extends Component {
     canvasExp.roundRect(ctx, '#fff', 0, 0, 375, 640, 5)
     canvasExp.textFill(ctx, username?username:'-', 90, 45, 18, '#333')
     canvasExp.textFill(ctx, '给你推荐好货好物', 90, 65, 14, '#999')
-    // canvasExp.drawImageFill(ctx, goods, 15, 95, 345, 345)
-    canvasExp.drawImageFill(ctx, goods, 15, 95,345,345)
+    canvasExp.drawImageFill1(ctx, goods,0,0,w,h, 15, 95,345,h/w*345)
     canvasExp.imgCircleClip(ctx, avatar, 15, 15, 65, 65)
     canvasExp.textMultipleOverflowFill(ctx, item_name, 22, 2, 15, 470, 345, 18, '#333')
     canvasExp.textSpliceFill(ctx, prices, 'left', 15, 600)
@@ -642,14 +670,14 @@ export default class Detail extends Component {
         Taro.authorize({
           scope: 'scope.writePhotosAlbum'
         })
-        .then(res => {
-          this.savePoster(poster)
-        })
-        .catch(res => {
-          this.setState({
-            showPoster: false
+          .then(res => {
+            this.savePoster(poster)
           })
-        })
+          .catch(res => {
+            this.setState({
+              showPoster: false
+            })
+          })
       } else {
         this.savePoster(poster)
       }
@@ -660,29 +688,16 @@ export default class Detail extends Component {
     Taro.saveImageToPhotosAlbum({
       filePath: poster
     })
-    .then(res => {
-      S.toast('保存成功')
-    })
-    .catch(res => {
-      S.toast('保存失败')
-    })
+      .then(res => {
+        S.toast('保存成功')
+      })
+      .catch(res => {
+        S.toast('保存失败')
+      })
   }
-
-  // handleToGiftMiniProgram = () => {
-  //   Taro.navigateToMiniProgram({
-  //     appId: APP_GIFT_APPID, // 要跳转的小程序的appid
-  //     path: '/pages/index/index', // 跳转的目标页面
-  //     success(res) {
-  //       // 打开成功
-  //       console.log(res)
-  //     }
-  //   })
-  // }
 
   handleShowPoster = async () => {
     const { posterImgs } = this.state
-    console.log('执行到了这一步')
-    console.log(posterImgs)
     if (!posterImgs || !posterImgs.avatar || !posterImgs.code || !posterImgs.goods) {
       const imgs = await this.downloadPosterImg()
       if (imgs && imgs.avatar && imgs.code && imgs.goods) {
@@ -777,6 +792,9 @@ export default class Detail extends Component {
       })
     },800)
   }
+  handleToStore(){
+    Taro.navigateTo({url:`/marketing/pages/user-store/visit-store?id=${this.$router.params.operator_id}`})
+  }
   render () {
     const userinfo = Taro.getStorageSync('userinfo')
     const store = Taro.getStorageSync('curStore')
@@ -810,7 +828,8 @@ export default class Detail extends Component {
       page,
       evaluationTotal,
       evaluationList,
-      type
+      type,
+      shopInfo
     } = this.state
     const { showLikeList, colors } = this.props
 
@@ -855,11 +874,10 @@ export default class Detail extends Component {
           >
             <View className='goods-imgs__wrap'>
               <Swiper
-                autoplay={false}
+                autoplay={4000}
                 className='goods-imgs__swiper'
                 indicatorDots={true}
                 current={curImgIdx}
-                interval={4000}
                 onChange={this.handleSwiperChange}
               >
                 {
@@ -868,7 +886,7 @@ export default class Detail extends Component {
                       <SwiperItem key={idx}>
                         <ItemImg
                           src={img}
-                        ></ItemImg>
+                        />
                       </SwiperItem>
                     )
                   })
@@ -972,7 +990,7 @@ export default class Detail extends Component {
             <View className='goods-hd'>
               <View className='goods-info__wrap'>
                 <View className='goods-title__wrap'>
-                  <Text className='goods-title' onLongPress={this.showCopy.bind(this)} onTouchEnd={this.hideCopy.bind(this)}>{info.item_name}</Text>
+                  <Text className='goods-title' onLongPress={this.showCopy.bind(this)} onTouchEnd={this.hideCopy.bind(this)}>{info.goods_brand?info.goods_brand !=='无品牌'?'':`【${info.goods_brand}】`:''}{info.item_name}</Text>
                   <Text className='goods-title__desc'>{info.brief}</Text>
                   <View onClick={this.copyName.bind(this,info.item_name)} className='copy' style={`display:${this.state.showCopy?'block':'none'}`}>复制</View>
                 </View>
@@ -1120,14 +1138,21 @@ export default class Detail extends Component {
                 coupon_list && new_coupon_list.map(kaquan_item => {
                   return (
                     <View key={kaquan_item.id} className='coupon_tag'>
-                      <View className='coupon_tag_circle circle_left'></View>
+                      <View className='coupon_tag_circle circle_left'/>
                       <Text>{kaquan_item.title}</Text>
-                      <View className='coupon_tag_circle circle_right'></View>
+                      <View className='coupon_tag_circle circle_right'/>
                     </View>
                   )
                 })
               }
             </SpCell>
+            {this.$router.params.operator_id&&
+            <View className='shop-info'>
+              <Image mode='widthFix' className='img' src={shopInfo.head_portrait}/>
+              <View className='owner-name'>{shopInfo.username}的小店</View>
+              <View className='to-visit' onClick={this.handleToStore.bind(this)}>进店逛逛</View>
+            </View>
+            }
 
             {
               promotion_activity && promotion_activity.length > 0
@@ -1265,24 +1290,24 @@ export default class Detail extends Component {
 
           {(info.distributor_sale_status && hasStock && startActivity)
             ?this.state.is_exchange?
-                (<GoodsBuyToolbar
-                  info={info}
-                  type='exchange'
-                  cartCount={cartCount}
-                  onFavItem={this.handleMenuClick.bind(this, 'fav')}
-                  onClickFastBuy={this.handleJudge.bind(this, 'fastbuy')}
-                >
-                </GoodsBuyToolbar>)
-            :(<GoodsBuyToolbar
-              info={info}
-              type={marketing}
-              cartCount={cartCount}
-              onFavItem={this.handleMenuClick.bind(this, 'fav')}
-              onClickAddCart={this.handleJudge.bind(this, 'cart')}       // the params different !!!
-              onClickFastBuy={this.handleJudge.bind(this, 'fastbuy')}
-            >
-              <View>{marketing}</View>
-            </GoodsBuyToolbar>)
+              (<GoodsBuyToolbar
+                info={info}
+                type='exchange'
+                cartCount={cartCount}
+                onFavItem={this.handleMenuClick.bind(this, 'fav')}
+                onClickFastBuy={this.handleJudge.bind(this, 'fastbuy')}
+              >
+              </GoodsBuyToolbar>)
+              :(<GoodsBuyToolbar
+                info={info}
+                type={marketing}
+                cartCount={cartCount}
+                onFavItem={this.handleMenuClick.bind(this, 'fav')}
+                onClickAddCart={this.handleJudge.bind(this, 'cart')}       // the params different !!!
+                onClickFastBuy={this.handleJudge.bind(this, 'fastbuy')}
+              >
+                <View>{marketing}</View>
+              </GoodsBuyToolbar>)
             :
             (<GoodsBuyToolbar
               info={info}
@@ -1306,11 +1331,11 @@ export default class Detail extends Component {
 
           {
             info && <GoodsBuyPanel
-              room_id={this.$router.params.room_id}
+              // is_seckill={this.state.is_seckill}
               assist_id={this.$router.params.assist_id}
               level={this.$router.params.level}
-              info={info}
               is_user_shop={this.$router.params.operator_id?1:0}
+              info={info}
               isexchange={this.state.is_exchange}
               type={buyPanelType}
               isOpened={showBuyPanel}
@@ -1326,6 +1351,7 @@ export default class Detail extends Component {
             <View className='share'>
               <SharePanel
                 info={uid}
+                goodsId={this.$router.params.id}
                 isOpen={showSharePanel}
                 onClose={() => this.setState({ showSharePanel: false })}
                 onClick={this.handleShowPoster.bind(this)}
@@ -1347,7 +1373,7 @@ export default class Detail extends Component {
             </View>
           }
 
-          <Canvas className='canvas' canvas-id='myCanvas'></Canvas>
+          <Canvas className='canvas' canvas-id='myCanvas'/>
 
           <SpToast />
         </View>
@@ -1363,10 +1389,11 @@ export default class Detail extends Component {
           <View className='code-input-content'><Input placeholder='邀请码' type='text' onInput={this.setCodeValue} placeholderStyle='color:#666666;font-size:17rpx;margin-left:20rpx'/></View>
           <View className='code-input-controller'>
             <View className='cancel' onClick={this.handleCancel}>暂不输入</View>
-            <View className='confirm' onClick={this.handleConfirm}>提交邀请码</View>
+            <View className='confirm' onClick={this.handleConfirm.bind(this)}>提交邀请码</View>
           </View>
         </View>
       </View>
     )
   }
 }
+

@@ -395,15 +395,15 @@ refresh(){
           </FloatMenus>
         }
 
-        {
-          automatic && automatic.isOpen && !S.getAuthToken() && //------------------------------------ toast
-            <Automatic
-              info={automatic}
-              isShow={showAuto}
-              onClick={this.handleGift.bind(this)}
-              onClose={this.handleAutoClick.bind(this)}
-            />
-        }
+        {/*{*/}
+        {/*  automatic && automatic.isOpen && !S.getAuthToken() && //------------------------------------ toast*/}
+        {/*    <Automatic*/}
+        {/*      info={automatic}*/}
+        {/*      isShow={showAuto}*/}
+        {/*      onClick={this.handleGift.bind(this)}*/}
+        {/*      onClose={this.handleAutoClick.bind(this)}*/}
+        {/*    />*/}
+        {/*}*/}
 
         <BackToTop
           show={showBackToTop}

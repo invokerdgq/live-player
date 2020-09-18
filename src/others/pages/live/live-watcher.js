@@ -10,20 +10,23 @@ import api from '@/api'
 import S from '@/spx'
 import entry from "../../../utils/entry";
 
-
 import TLS from './tls.min'
-import {Loading} from "../../../components";
+import { Loading,FilterBar } from "../../../components";
 import OwnerModal from './coms/own-modal'
-import {connect} from "@tarojs/redux";
+import { connect } from "@tarojs/redux";
 import WithTim from "../../../hocs/withTim";
 
 
-@WithTim
+@connect(({liveGoods}) => ({
+  storeGoods:liveGoods.storeGoods,
+  flatGoods:liveGoods.flatGoods
+}))
 @connect(({passenger}) => ({
   passenger
 }),(dispatch) =>({
   changePassenger:(load) => dispatch({type:'passenger',payload:load})
 }))
+@WithTim
 @withPager
 export default class LiveWatcher extends Component{
   static options = {
@@ -36,15 +39,16 @@ export default class LiveWatcher extends Component{
     super(props);
     this.state = {
       ...this.state,
-      imgLeft:330,
-      imgTop:920,
+      timerWatcher:null,
+      coin:0,
+      time:0,
       animationPic:'',
       showGiftSelect:false,
       giftSelectIndex:'',
       owner:0,
       location:'',
       likeCount:[],
-      timerLiver:null,
+      giftCount:[],
       showExitChoose:false,
       onlineNum:0,
       im_id:'',
@@ -58,7 +62,6 @@ export default class LiveWatcher extends Component{
       fans:'',
       likes:'',
       room_cover:'',
-      timer:null,
       pullStreamLink:'',
       pushStreamLink:'',
       room_status:true,
@@ -69,12 +72,12 @@ export default class LiveWatcher extends Component{
       watcherList:[],
       onlineList:[],
       fansList:[],
-      goodsList:[],
-      watcherType:'line',
+      totalGoods:{},
+      curFilterIdx:0,
+      filterList:[{title:'苏心淘商品'},{title:'个人店铺商品'}],
+      watcherType:'line'
     }
     this.top = Taro.getStorageSync('top')
-  }
-  componentWillMount(){
   }
   componentDidShow() {
     Taro.setKeepScreenOn({
@@ -83,178 +86,60 @@ export default class LiveWatcher extends Component{
     entry.entryLaunch(this.$router.params)
     this.setState({
       im_id:this.$router.params.im_id,
-      owner:0
+      owner:0,
+      operator_id:this.$router.params.operator_id
     },() => {
       if(!this.tls){
         this.preLog()
       }
     })
   }
-   componentDidMount() {
+  async componentDidMount() {
+    if(!S.getAuthToken()) return
+    this.updateSurplus()
     this.context = Taro.createLivePusherContext()
-    // const {total_count,list} = await api.live.getGiftList()
-    // const {total_count:depositCount,list:depositList} = await api.live.getDepositList()
-    let list = [
-      {
-        "id": "1",
-      "title": "火箭",
-      "price": 100,
-      "pic": "45645",
-      "is_lock": 0,
-      "created": 1212,
-      "updated": 454564
-    }, {
-        "id": "2",
-        "title": "火箭",
-        "price": 100,
-        "pic": "45645",
-        "is_lock": 0,
-        "created": 1212,
-        "updated": 454564
-      }, {
-        "id": "3",
-        "title": "火箭",
-        "price": 100,
-        "pic": "45645",
-        "is_lock": 0,
-        "created": 1212,
-        "updated": 454564
-      }, {
-        "id": "4",
-        "title": "火箭",
-        "price": 100,
-        "pic": "45645",
-        "is_lock": 0,
-        "created": 1212,
-        "updated": 454564
-      }, {
-        "id": "5",
-        "title": "火箭",
-        "price": 100,
-        "pic": "45645",
-        "is_lock": 0,
-        "created": 1212,
-        "updated": 454564
-      }, {
-        "id": "6",
-        "title": "火箭",
-        "price": 100,
-        "pic": "45645",
-        "is_lock": 0,
-        "created": 1212,
-        "updated": 454564
-      }, {
-        "id": "7",
-        "title": "火箭",
-        "price": 100,
-        "pic": "45645",
-        "is_lock": 0,
-        "created": 1212,
-        "updated": 454564
-      }, {
-        "id": "8",
-        "title": "火箭",
-        "price": 100,
-        "pic": "45645",
-        "is_lock": 0,
-        "created": 1212,
-        "updated": 454564
-      }, {
-        "id": "9",
-        "title": "火箭",
-        "price": 100,
-        "pic": "45645",
-        "is_lock": 0,
-        "created": 1212,
-        "updated": 454564
-      }, {
-        "id": "10",
-        "title": "火箭",
-        "price": 100,
-        "pic": "45645",
-        "is_lock": 0,
-        "created": 1212,
-        "updated": 454564
-      }, {
-        "id": "11",
-        "title": "火箭",
-        "price": 100,
-        "pic": "45645",
-        "is_lock": 0,
-        "created": 1212,
-        "updated": 454564
-      }, {
-        "id": "12",
-        "title": "火箭",
-        "price": 100,
-        "pic": "45645",
-        "is_lock": 0,
-        "created": 1212,
-        "updated": 454564
-      }, {
-        "id": "13",
-        "title": "火箭",
-        "price": 100,
-        "pic": "45645",
-        "is_lock": 0,
-        "created": 1212,
-        "updated": 454564
-      }, {
-        "id": "14",
-        "title": "火箭",
-        "price": 100,
-        "pic": "45645",
-        "is_lock": 0,
-        "created": 1212,
-        "updated": 454564
-      }, {
-        "id": "15",
-        "title": "火箭",
-        "price": 100,
-        "pic": "45645",
-        "is_lock": 0,
-        "created": 1212,
-        "updated": 454564
-      }, {
-        "id": "16",
-        "title": "火箭",
-        "price": 100,
-        "pic": "45645",
-        "is_lock": 0,
-        "created": 1212,
-        "updated": 454564
-      },
-    ]
-     let depositList =[]
+    const {total_count,list} = await api.live.getGiftList()
+    const depositList = await api.live.getDepositList()
     let gList = []
      let dList = []
      let i = 0
-    while (8*i<list.length){
+    while (8*i < list.length){
       i++
-      gList.push(list.slice(8*(i-1),8*i))
+      gList.push(list.slice(8*(i-1),8*i > list.length?list.length:8*i))
     }
     let j = 0
-     while (8*j<depositList.length){
+     while (6*j < depositList.length){
        j++
-       dList.push(depositList.slice(8*(j-1),8*j))
+       dList.push(depositList.slice(6*(j-1),6*j > depositList.length?depositList.length:6*j))
      }
     this.setState({
       giftList:gList,
-      depositList
+      depositList:dList
     })
   }
-
   componentWillUnmount(){
-    clearInterval(this.state.timer)
-    clearInterval(this.state.timerLiver)
-    this.statusSend('off')
+    clearInterval(this.state.timerWatcher)
+    api.live.changeUserStatus({room_id: this.state.im_id,status:'off'})
     this.tls.exitRoom()
   }
-
   componentWillReceiveProps(nextProps, nextContext) {
     if(this.props.passenger.is_passenger && !nextProps.passenger.is_passenger && this.tls){
       this.tls.destroy()
     }
+  }
+  sendStatus(type){
+    let interval = () => {
+      try {
+        api.live.changeUserStatus({room_id: this.state.im_id,status:type})
+      } catch (e) {
+        console.log(e)
+      }
+    }
+    interval()
+    let timerWatcher = setInterval(interval, 1000 * 60 * 3)
+    this.setState({
+      timerWatcher
+    })
   }
   preLog(){
     if(!S.getAuthToken()){
@@ -266,19 +151,26 @@ export default class LiveWatcher extends Component{
           if(res.confirm){
             setTimeout(() => {
               S.login(this)
+              return
             },500)
           }else{
             const { code } = await Taro.login()
             const { token } = await api.wx.login({ code,guest:1 })
             Taro.setStorageSync('auth_token',token)
             this.props.changePassenger(true)
-            this.initTim()
+            this.postUserInfo()
           }
         }
       })
       return
     }
-    this.initTim()
+    this.postUserInfo()
+  }
+  async updateGoods(){
+    const {products} = await api.live.getUserSig({owner:0,room_id:this.state.im_id})
+    this.setState({
+      totalGoods:JSON.parse(products)
+    })
   }
   postUserInfo = async ()=>{
     Taro.showLoading({
@@ -307,78 +199,66 @@ export default class LiveWatcher extends Component{
     }
     if(!ERR){
       Taro.hideLoading()
+      this.sendStatus('on')
+      this.initTim()
     }
   }
   initTim = async()=>{
-    await this.postUserInfo()
     const {user_id = 1,userSig,url,products,is_subscribe,room_live_link,room_status} = await api.live.getUserSig({owner:0,room_id:this.state.im_id})
     this.init(userSig,user_id,this.state.im_id,() => {
-      this.statusSend('on')
-      this.nextPage()
+      setTimeout(() => {
+        this.nextPage()
+      },100)
     })
-    let list
+    let goods
     try{
-      let newList =  JSON.parse(products)
-      if( Array.isArray(newList)){
-        list = newList
-      }else {
-        list = []
+      let obj = JSON.parse(products)
+      if(obj.flatGoods){
+        goods = obj
+      }else{
+        goods = {
+          flatGoods:[],
+          storeGoods:[]
+        }
       }
     }catch (e) {
-      list = []
+      goods = {
+        flatGoods:[],
+        storeGoods:[]
+      }
     }
     this.setState({
       pullStreamLink:room_live_link,
       pushStreamLink:url,
       room_status:room_status,
       is_subscribe:is_subscribe,
-      goodsList:list
+      totalGoods:goods
     })
     api.live.addHistory({
       room_id:this.state.im_id,
       source:Taro.getStorageSync('distribution_shop_id')
     })
   }
-
   onShareAppMessage(obj) {
     return{
       title:'快来观看直播吧~',
-      path:`/others/pages/live/live-watcher?im_id=${this.state.im_id}&uid=${this.state.memberInfo.user_card_code}`,
+      path:`/others/pages/live/live-watcher?im_id=${this.state.im_id}&uid=${this.state.memberInfo.user_card_code}&user_id=${this.state.memberInfo.user_id}&operator_id=${this.state.operator_id}`,
       imageUrl:this.state.groupInfo.avatar
     }
   }
-
-  statusSend(type){
-    let interval =  () =>{
-      try{
-        api.live.changeUserStatus({room_id:this.state.im_id,status:type})
-      }catch (e) {
-        console.log(e)
-      }
-    }
-    interval()
-    if(type === 'on'){
-      let timer = setInterval(interval,1000*60*3)
-      this.setState({
-        timer
-      })
-    }else{
-      clearInterval(this.state.timer)
-      try{
-        api.live.changeUserStatus({room_id:this.state.im_id,status:type})
-      }catch (e) {
-        console.log(e)
-      }
-    }
+  async updateSurplus(){
+    const {coin} = await api.live.getCoinSurplus()
+    this.setState({
+      coin
+    })
   }
-
   handleWatchTim(type,data){
     let formate = this.formate
     let msg = this.handleMsgLength()
     switch (type) {
       case 'RoomStatusChange':
          this.setState({
-           liverStatus:data
+           liverStatus:data.value
          })
         break
       case 'JoinGroup':
@@ -418,10 +298,6 @@ export default class LiveWatcher extends Component{
         })
         break
       case 'Like':
-        msg.push({
-          user_name: formate(data.nick),
-          user_message: '给主播点赞了',
-        })
         this.setState({
           likes:Number(this.state.likes) +1
         })
@@ -446,6 +322,26 @@ export default class LiveWatcher extends Component{
           fans:Number(this.state.fans) -1
         })
         break
+      case 'SendGift':
+        msg.push({
+          user_name:formate(data.nick),
+          user_message:`给主播送了一个${data.value}`
+        })
+        this.setState({
+          msgList:msg
+        })
+        break
+      case 'AddGoods':
+        this.updateGoods()
+        if(data.value !== 'add') return
+        msg.push({
+          user_name:'',
+          user_message:`主播添加了新的商品，快去看看吧`
+        })
+        this.setState({
+          msgList:msg
+        })
+        break
       default :
         break
     }
@@ -460,11 +356,9 @@ export default class LiveWatcher extends Component{
     }
     return arr
   }
-
   formate = (name,add=false)=>{
     return `${name}${add?' :':''}`
   }
-
   handleSendMessage = async(e) =>{
     this.tls.sendMessage(e.detail.value).then((res) => {
       let msg = this.handleMsgLength();
@@ -478,7 +372,19 @@ export default class LiveWatcher extends Component{
       })
     })
   }
-
+  handleSendGiftSuccess(giftName){
+    this.tls.sendGift(giftName).then(res => {
+      let msg = this.handleMsgLength();
+      msg.push({
+        user_name: '',
+        user_message: `帅气的你给主播送了一个${res.value}`,
+      })
+      this.setState({
+        msgList:msg,
+        type:''
+      })
+    })
+  }
   fetch = async (params)=>{
     const {page_no,page_size} = params
     if(this.state.watcherType === 'com'){
@@ -543,7 +449,6 @@ export default class LiveWatcher extends Component{
       return {total}
     }
   }
-
   showMoreDec(type,pType,e){
     this.setState({
       type:type
@@ -555,7 +460,6 @@ export default class LiveWatcher extends Component{
     if(pType) this.changeWatcher(pType)
     if(e) e.stopPropagation()
   }
-
   showData(){
     if(this.state.type !== ''){
       this.setState({
@@ -582,7 +486,6 @@ export default class LiveWatcher extends Component{
     })
     if(e)e.stopPropagation()
   }
-
   async clickBtn(type){
     switch (type) {
       case 'like':
@@ -635,11 +538,6 @@ export default class LiveWatcher extends Component{
       inputMessage:e.detail.value
     })
   }
-  animationEnd(){
-    this.setState({
-      showGift:false
-    })
-  }
   changeHeight(e){
     this.setState({
       height:e.detail.height
@@ -664,9 +562,16 @@ export default class LiveWatcher extends Component{
       })
       return
     }
-    Taro.navigateTo({
-      url: `/pages/item/espier-detail?id=${item.item_id}&room_id=${this.state.im_id}`
-    })
+    if(this.state.curFilterIdx === 0){
+      Taro.navigateTo({
+        url: `/pages/item/espier-detail?id=${item.item_id}&uid=${this.$router.params.uid}&user_id=${this.$router.params.user_id}`
+      })
+    }else{
+      Taro.navigateTo({
+        url: `/pages/item/espier-detail?id=${item.item_id}&uid=${this.$router.params.uid}&user_id=${this.$router.params.user_id}&operator_id=${this.$router.params.operator_id}`
+      })
+    }
+
   }
   handleEnd(){
     this.setState({
@@ -684,7 +589,7 @@ export default class LiveWatcher extends Component{
     })
   }
   handleOwnConfirm(){
-      this.statusSend('off')
+      api.live.changeUserStatus({room_id: this.state.im_id,status:'off'})
       this.tls.exitRoom()
   }
   handleLike(){
@@ -710,54 +615,107 @@ export default class LiveWatcher extends Component{
       giftSelectIndex:index
     })
   }
-  async handleSendGift(id,pic){
+  async handleSendGift(item){
      let uid = this.state.ownerInfo.userID
      let option = {
-       gift_id:id,
+       gift_id:item.id,
        receiver_id:uid
      }
-    this.setState({
-      type:'',
-      animationPic:pic
-    })
-    this.loveAnimation()
-    return
      const {status} = await api.live.sendGift(option)
     if(status === 'ok'){
+      this.updateSurplus()
+      this.handleSendGiftSuccess(item.title)
       this.setState({
         type:'',
-        animationPic:pic
+        animationPic:item.pic
       },() => {
-        this.loveAnimation()
+        this.setState({
+          giftCount:[]
+        },() =>{
+          this.loveAnimation()
+        })
       })
     }else{
       Taro.showToast({title:'送礼失败，稍后重试',icon:"none",duration:1000})
     }
   }
-  handleDeposit(){
+  handleShowDeposit(){
     this.showMoreDec('deposit-detail','')
+  }
+ async handleDeposit(item) {
+    Taro.showModal({
+      title:'确认充值',
+      success:async (res) =>{
+        if(res.confirm){
+          const config = await api.live.buyCoin({price:item.price,appId:Taro.getExtConfigSync().appid})
+          Taro.requestPayment({
+            timeStamp:config.timeStamp,
+            nonceStr: config.nonceStr,
+            package:  config.package,
+            signType: config.signType,
+            paySign:  config.paySign,
+            success: (res)=> {
+              Taro.showModal({
+                content: '支付成功',
+                showCancel: false,
+                success: (res) => {
+                  this.updateSurplus()
+                }
+              })
+            },
+            fail: function (res) {
+              Taro.showModal({
+                content: '支付失败',
+                showCancel: false
+              })
+            }
+          })
+        }
+      }
+    })
+  }
+  caculatePoi(time,index){
+    // return {
+    //   left:260*Math.sin((time-index * 150)/1000)*(1+Math.cos((time-index *150)/1000)) +330,
+    //   top:260*(1+Math.cos((time-index * 150)/1000))*Math.cos((time-index * 150)/1000)+ 460
+    // }
+    return{
+      left:340*Math.sin(9*(time-index * 150)/1000/3)*Math.cos((time-index * 150)/1000/3) +330,
+      top:340*Math.sin(9*(time-index * 150)/1000/3)*Math.sin((time-index * 150)/1000/3)+ 660
+    }
   }
   loveAnimation(){
     let time = 0
-
     let timer = setInterval(() => {
-       this.setState({
-         imgLeft:260*Math.sin(time/1000)*(1+Math.cos(time/1000)) +330,
-         imgTop:260*(1+Math.cos(time/1000))*Math.cos(time/1000)+ 400
-       })
-      if(time > 3.1416 * 1000 * 2) {
-        clearInterval(timer)
+      if(Math.floor(time/150) > Math.floor((time-50)/150)){
         this.setState({
-          animationPic:''
+          giftCount:[...this.state.giftCount,1]
         })
       }
-      time += 100
-    },100)
+      this.setState({
+        time:time,
+      })
+      if(time > 3.1416 * 1000 * 2 *3  ) {
+        clearInterval(timer)
+        setTimeout(() => {
+          this.setState({
+            giftCount:[],
+            time:0
+          })
+        },700)
+      }
+      time += 50
+    },50)
 
   }
+  handleFilterChange(e){
+    this.setState({
+      curFilterIdx:e.current
+    })
+  }
   render() {
-    const {imgLeft,imgTop,animationPic,giftSelectIndex,giftList,location,likeCount,filterList,liverStatus,showExitChoose,backType,fansList,onlineNum,buyerNick,showGift,current,is_subscribe,loading,fans,likes,groupInfo,ownerInfo,type,msgList,watcherList,onlineList,watcherType,goodsList,pullStreamLink,pushStreamLink,room_status,inputMessage} = this.state
-    let newList
+    const {totalGoods,coin,time,giftCount,curFilterIdx,animationPic,giftSelectIndex,giftList,depositList,location,likeCount,filterList,liverStatus,showExitChoose,backType,fansList,onlineNum,buyerNick,showGift,current,is_subscribe,loading,fans,likes,groupInfo,ownerInfo,type,msgList,watcherList,onlineList,watcherType,pullStreamLink,pushStreamLink,room_status,inputMessage} = this.state
+    let newList,goodsList
     let len = this.state.msgList.length
     if(watcherType === 'com'){
       newList = watcherList
@@ -765,6 +723,12 @@ export default class LiveWatcher extends Component{
       newList = onlineList
     }else{
       newList = fansList
+    }
+
+    if(curFilterIdx === 0){
+      goodsList = totalGoods.flatGoods
+    }else{
+      goodsList = totalGoods.storeGoods
     }
     return(
       <View>
@@ -896,10 +860,10 @@ export default class LiveWatcher extends Component{
                 <View className={`more-item order-3`}>
                   <View className='container'/>
                   <View className='like' onClick={this.clickBtn.bind(this,'gift')}><Image src={`${cdn}/like.png`} mode='widthFix' className='like-img'/></View>
-                  {
-                    showGift &&
-                  <Image src={`${cdn}/${current}.png`} className='img' mode='widthFix' onAnimationEnd={this.animationEnd.bind(this)} style={{zIndex:'100000000'}}/>
-                  }
+                  {/*{*/}
+                  {/*  showGift &&*/}
+                  {/*<Image src={`${cdn}/${current}.png`} className='img' mode='widthFix' onAnimationEnd={this.animationEnd.bind(this)} style={{zIndex:'100000000'}}/>*/}
+                  {/*}*/}
                 </View>
                 <View className={`more-item order-4`}>
                   <View className='container'/>
@@ -924,21 +888,41 @@ export default class LiveWatcher extends Component{
             type === 'deposit-detail'&&
               <View className='deposit-detail' onClick={this.stop}>
                  <View className='user-info-deposit'>
-                   <View className='cash-dec'><Text>余额:</Text><View className='iconfont icon-jinbi'/><Text>{11}</Text></View>
+                   <View className='cash-dec'><Text>余额:</Text><View className='iconfont icon-jinbi'/><Text>{coin}</Text></View>
                    <View className='deposit-dec'>充值</View>
                  </View>
                 <View className='deposit-list'>
                   <Swiper
-                    className='gift-swiper'
+                    className='deposit-swiper'
                     indicatorDots={true}
                     indicatorActiveColor='#c0534e'
                     indicatorColor='gray'
                     onChange={this.handleSwiperChange.bind(this)}
                   >
                     {
-
+                      depositList.map((item,index) => {
+                        return(
+                          <SwiperItem>
+                            <View className='dp-item'>
+                              {
+                                item.map((item1,index1) => {
+                                  return(
+                                    <View className='s-item' onClick={this.handleDeposit.bind(this,item1)}>
+                                      <View className='s-item-top'><View className='iconfont icon-jinbi'/><Text className='coin-amount'>{item1.amount}</Text></View>
+                                      <View className='coin-price'>{Number(item1.price).toFixed(2)}元</View>
+                                    </View>
+                                  )
+                                })
+                              }
+                            </View>
+                          </SwiperItem>
+                        )
+                      })
                     }
                     </Swiper>
+                  <View className='deposit-agreement'>
+                    充值及代表同意<Text className='agreement'>用户充值协议</Text>
+                  </View>
                 </View>
               </View>
           }
@@ -946,8 +930,8 @@ export default class LiveWatcher extends Component{
            type === 'gift-detail' &&
              <View className='gift-detail' onClick={this.stop}>
                <View className='user-info-cash'>
-                <View className='cash-dec'><Text>余额:</Text><View className='iconfont icon-jinbi'/><Text>{11}</Text></View>
-                <View className='deposit' onClick={this.handleDeposit.bind(this)}>充值 ></View>
+                <View className='cash-dec'><Text>余额:</Text><View className='iconfont icon-jinbi'/><Text>{coin}</Text></View>
+                <View className='deposit' onClick={this.handleShowDeposit.bind(this)}>充值 ></View>
                </View>
                <View className='gift-send-out'>
                 <Swiper
@@ -958,7 +942,7 @@ export default class LiveWatcher extends Component{
                   onChange={this.handleSwiperChange.bind(this)}
                 >
                   {
-                    giftList.map((item,index)=> {
+                    giftList.map(item=> {
                       return(
                         <SwiperItem >
                           <View className='sp-item'>
@@ -981,7 +965,7 @@ export default class LiveWatcher extends Component{
                                                 <View  className='gift-price-selected'>
                                                   {gitem.price}金币
                                                 </View>
-                                                <View className='gift-name-selected' onClick={this.handleSendGift.bind(this,gitem.id,gitem.pic)}>
+                                                <View className='gift-name-selected' onClick={this.handleSendGift.bind(this,gitem)}>
                                                   发送
                                                 </View>
                                               </View>
@@ -1071,7 +1055,13 @@ export default class LiveWatcher extends Component{
           {
             type === 'cart-detail'&&
             <View className='cart-detail' onClick={this.stop}>
-              <View className='cart-detail-title'>共{goodsList.length}件商品</View>
+              <FilterBar
+                className='goods-list__tabs'
+                custom
+                current={curFilterIdx}
+                list={filterList}
+                onChange={this.handleFilterChange.bind(this)}
+              />
               <View className='cart-detail-list'>
                 <ScrollView
                   scrollY
@@ -1104,8 +1094,12 @@ export default class LiveWatcher extends Component{
             </View>
           }
           {
-            animationPic &&
-              <Image mode='widthFix' className='ani-img' src={animationPic} id={'ani'} style={{left:imgLeft+'rpx',top:imgTop + 'rpx'}}/>
+            animationPic && giftCount.length !== 0 &&
+              giftCount.map((item,index) => {
+                return (
+                  <Image mode='widthFix' className='ani-img' src={animationPic} id={'ani'} style={{left:this.caculatePoi(time,index).left+'rpx',top:this.caculatePoi(time,index).top + 'rpx'}} key='gift'/>
+                )
+              })
           }
         </View>
       </View>

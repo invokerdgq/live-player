@@ -273,7 +273,7 @@ export default class GoodsBuyPanel extends Component {
   handleBuyClick = async (type, skuInfo, num) => {
     console.warn(this.props)
     if (this.state.busy) return
-
+    const user_id = Taro.getStorageSync('user_id')
     const { marketing, info } = this.state
     const { special_type } = info
     const isDrug = special_type === 'drug'
@@ -293,7 +293,7 @@ export default class GoodsBuyPanel extends Component {
           num,
           distributor_id,
           shop_type: isDrug ? 'drug' : 'distributor',
-          reference:this.props.room_id,
+          reference:user_id,
           is_user_shop:this.props.is_user_shop
 				})
 				Taro.showToast({
@@ -332,7 +332,7 @@ export default class GoodsBuyPanel extends Component {
         await api.cart.fastBuy({
           item_id,
           num,
-          reference:this.props.room_id,
+          reference:user_id,
           is_user_shop:this.props.is_user_shop
         })
       } catch (e) {

@@ -9,12 +9,15 @@ import { pickBy, classNames } from '@/utils'
 import NavGap from "../../components/nav-gap/nav-gap";
 
 import './list.scss'
+import {tls,TLS} from "../../hocs/withTim";
 
 @connect(({liveGoods}) => ({
-  flatGoods:liveGoods.flatGoods
+  flatGoods:liveGoods.flatGoods,
+  storeGoods:liveGoods.storeGoods,
+  name:liveGoods.name,
+  face_url:liveGoods.face_url
 }),(dispatch) =>({
   setFlat:(arr) => dispatch({type:'liveGoods/setFlat',payload:arr}),
-  clearFlat:() => dispatch({type:'liveGoods/clearFlat'}),
 }))
 @connect(({
   member
@@ -26,7 +29,6 @@ import './list.scss'
 export default class List extends Component {
   constructor (props) {
     super(props)
-
     this.state = {
       ...this.state,
       is_live:false,
@@ -204,13 +206,15 @@ componentWillMount() {
   handleClickItem = (item,index) => {                                              //点击单个项目 回调
     if(this.state.is_live){
       if(this.state.list[index].is_live){
-        this.state.list[index].is_live = false
-        this.state.chooseList = this.state.chooseList.filter(item => {
-          return item.item_id !=this.state.list[index].item_id
-        })
+        // 不允许取消选择
+        return
+        // this.state.list[index].is_live = false
+        // this.state.chooseList = this.state.chooseList.filter(item => {
+        //   return item.item_id !=this.state.list[index].item_id
+        // })
       }else{
         this.state.list[index].is_live = true
-        this.state.chooseList.push(this.state.list[index])
+        this.state.chooseList.unshift(this.state.list[index])
       }
       this.setState({
         list:this.state.list,
@@ -355,9 +359,16 @@ componentWillMount() {
       })
     })
 	}
-  confirmChoose(){
+ async confirmChoose(){
     this.props.setFlat(this.state.chooseList)
-    // update goods
+    const res = await api.live.postConfig({
+      name:this.props.name,
+      face_url:this.props.face_url,
+      products:JSON.stringify({flatGoods:this.props.flatGoods,storeGoods:this.props.storeGoods})
+    })
+   if(tls){
+     tls.sendCustomMsgAndEmitEvent(TLS.EVENT.ADD_GOODS,'add')
+   }
     Taro.navigateBack()
   }
   render () {
