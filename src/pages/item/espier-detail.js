@@ -42,6 +42,7 @@ export default class Detail extends Component {
 
     this.state = {
       ...this.state,
+      currentShop:'',
       shopInfo:{
         username:'',
         head_portrait:''
@@ -141,12 +142,13 @@ export default class Detail extends Component {
       }
       Taro.setStorageSync('userinfo', userObj)
     }
-    if(operator_id && operator_id !== ''){
+    if(operator_id ){
       api.store.getShopInfo(operator_id).then((res) => {
         this.setState({
           shopInfo:res
         })
       })
+      this.fetchStoreHistory()
     }
     if(operator_id && this.$router.params.uid && S.getAuthToken()){
       try{
@@ -163,6 +165,12 @@ export default class Detail extends Component {
     // this.getEvaluationList()                          -------------------------------请求 出错 暂时注释
   }
 
+  async fetchStoreHistory(){
+    const res = await api.store.getShopHistoryList({page:1,pageSize:10})
+    this.setState({
+      currentShop:res.list.length === 0?null:res.list[0]
+    })
+  }
   async getEvaluationList () {
     const {list, total_count} = await api.item.evaluationList({
       page: 1,
@@ -1336,6 +1344,7 @@ export default class Detail extends Component {
               level={this.$router.params.level}
               is_user_shop={this.$router.params.operator_id?1:0}
               info={info}
+              currentShop={this.state.currentShop}
               isexchange={this.state.is_exchange}
               type={buyPanelType}
               isOpened={showBuyPanel}

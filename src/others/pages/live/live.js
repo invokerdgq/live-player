@@ -552,7 +552,7 @@ componentWillMount() {
         break
       case 'gift':
         Taro.showToast({
-          title: '暂未开放',
+          title: '不能给自己送礼',
           icon: 'none'
         })
         break
@@ -891,7 +891,7 @@ componentWillMount() {
               </View>
                <View className='config-bottom'>
                  <View className='feature-list'>
-                   <View className='item' onClick={this.changeConfig.bind(this,'reverse')}><View className='iconfont icon-reverse'/><Text>翻转</Text></View>
+                   <View className='item' onClick={this.changeConfig.bind(this,'reverse')}><Image src={`${cdn}/reverse.png`} className='reverse-img'/><Text>翻转</Text></View>
                    <View className='item' onClick={this.changeConfig.bind(this,'pusher/beautify')}><View className='iconfont icon-beauty'/><Text>美颜</Text></View>
                    <View className='item' onClick={this.changeConfig.bind(this,'pusher/filter')}><View className='iconfont icon-filt'/><Text>滤镜</Text></View>
                    <View className='item' onClick={this.changeConfig.bind(this,'goods')}><View className='iconfont icon-gouwucheman'/><Text>商品</Text></View>
@@ -1106,10 +1106,10 @@ componentWillMount() {
             type === 'live-setting' &&
             setType === 'goods' &&
               <View className='goods-set-detail' onClick={this.stop}>
-                <View className='setting-title'>商品设置</View>
+                <View className='setting-title'>商品添加</View>
                 <View className='set-feature'>
-                  <View onClick={this.manageStore.bind(this,'live')} className='f-item'>直播店铺管理</View>
-                  <View onClick={this.manageStore.bind(this,'personal')} className='f-item'>个人小店管理</View>
+                  <View onClick={this.manageStore.bind(this,'live')} className='f-item'><View className='iconfont icon-add-sy'/>直播店铺管理</View>
+                  <View onClick={this.manageStore.bind(this,'personal')} className='f-item'><View className='iconfont icon-add-sy'/>个人小店管理</View>
                 </View>
               </View>
           }
@@ -1151,7 +1151,7 @@ componentWillMount() {
           {
             im_id &&
               <View className='aside-set'>
-                <View className='item' onClick={this.changeConfig.bind(this,'reverse')}><View className='iconfont icon-reverse'/><Text>翻转</Text></View>
+                <View className='item' onClick={this.changeConfig.bind(this,'reverse')}><Image src={`${cdn}/reverse.png`} className='reverse-img'/><Text>翻转</Text></View>
                 <View className='item' onClick={this.changeConfig.bind(this,'pusher/beautify')}><View className='iconfont icon-beauty'/><Text>美颜</Text></View>
                 <View className='item' onClick={this.changeConfig.bind(this,'pusher/filter')}><View className='iconfont icon-filt'/><Text>滤镜</Text></View>
                 <View className='item' onClick={this.changeConfig.bind(this,'goods')}><View className='iconfont icon-gouwucheman'/><Text>商品</Text></View>

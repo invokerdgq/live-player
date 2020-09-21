@@ -11,7 +11,7 @@ import S from '@/spx'
 import entry from "../../../utils/entry";
 
 import TLS from './tls.min'
-import { Loading,FilterBar } from "../../../components";
+import { Loading,FilterBar,FloatMsg } from "../../../components";
 import OwnerModal from './coms/own-modal'
 import { connect } from "@tarojs/redux";
 import WithTim from "../../../hocs/withTim";
@@ -69,6 +69,7 @@ export default class LiveWatcher extends Component{
       type:'',
       inputMessage:'',
       msgList:[],
+      giftMsgList:[],
       watcherList:[],
       onlineList:[],
       fansList:[],
@@ -323,12 +324,14 @@ export default class LiveWatcher extends Component{
         })
         break
       case 'SendGift':
-        msg.push({
-          user_name:formate(data.nick),
-          user_message:`给主播送了一个${data.value}`
-        })
+        let obj = entry.parseUrlStr(data.value)
+        let giftMsgItem = {
+          giftName:obj.giftName,
+          giftUrl:obj.giftUrl,
+          resource:data.nick
+        }
         this.setState({
-          msgList:msg
+          giftMsgList:[...this.state.giftMsgList,giftMsgItem]
         })
         break
       case 'AddGoods':
@@ -372,16 +375,10 @@ export default class LiveWatcher extends Component{
       })
     })
   }
-  handleSendGiftSuccess(giftName){
-    this.tls.sendGift(giftName).then(res => {
-      let msg = this.handleMsgLength();
-      msg.push({
-        user_name: '',
-        user_message: `帅气的你给主播送了一个${res.value}`,
-      })
+  handleSendGiftSuccess(item){
+    this.tls.sendGift(`giftName=${item.title}&giftUrl=${item.pic}`).then(res => {
       this.setState({
-        msgList:msg,
-        type:''
+        giftMsgList:[...this.state.giftMsgList,{resource:'你',giftName: item.title,giftUrl:item.pic}]
       })
     })
   }
@@ -571,7 +568,6 @@ export default class LiveWatcher extends Component{
         url: `/pages/item/espier-detail?id=${item.item_id}&uid=${this.$router.params.uid}&user_id=${this.$router.params.user_id}&operator_id=${this.$router.params.operator_id}`
       })
     }
-
   }
   handleEnd(){
     this.setState({
@@ -624,7 +620,7 @@ export default class LiveWatcher extends Component{
      const {status} = await api.live.sendGift(option)
     if(status === 'ok'){
       this.updateSurplus()
-      this.handleSendGiftSuccess(item.title)
+      this.handleSendGiftSuccess(item)
       this.setState({
         type:'',
         animationPic:item.pic
@@ -675,14 +671,14 @@ export default class LiveWatcher extends Component{
     })
   }
   caculatePoi(time,index){
-    // return {
-    //   left:260*Math.sin((time-index * 150)/1000)*(1+Math.cos((time-index *150)/1000)) +330,
-    //   top:260*(1+Math.cos((time-index * 150)/1000))*Math.cos((time-index * 150)/1000)+ 460
-    // }
-    return{
-      left:340*Math.sin(9*(time-index * 150)/1000/3)*Math.cos((time-index * 150)/1000/3) +330,
-      top:340*Math.sin(9*(time-index * 150)/1000/3)*Math.sin((time-index * 150)/1000/3)+ 660
+    return {
+      left:260*Math.sin((time-index * 150)/1000)*(1+Math.cos((time-index *150)/1000)) +330,
+      top:260*(1+Math.cos((time-index * 150)/1000))*Math.cos((time-index * 150)/1000)+ 460
     }
+    // return{
+    //   left:340*Math.sin(9*(time-index * 150)/1000/3)*Math.cos((time-index * 150)/1000/3) +330,
+    //   top:340*Math.sin(9*(time-index * 150)/1000/3)*Math.sin((time-index * 150)/1000/3)+ 660
+    // }
   }
   loveAnimation(){
     let time = 0
@@ -695,7 +691,7 @@ export default class LiveWatcher extends Component{
       this.setState({
         time:time,
       })
-      if(time > 3.1416 * 1000 * 2 *3  ) {
+      if(time > 3.1416 * 1000 * 2   ) {
         clearInterval(timer)
         setTimeout(() => {
           this.setState({
@@ -713,8 +709,13 @@ export default class LiveWatcher extends Component{
       curFilterIdx:e.current
     })
   }
+  handleFloatEnd(){
+    this.setState({
+      giftMsgList:[]
+    })
+  }
   render() {
-    const {totalGoods,coin,time,giftCount,curFilterIdx,animationPic,giftSelectIndex,giftList,depositList,location,likeCount,filterList,liverStatus,showExitChoose,backType,fansList,onlineNum,buyerNick,showGift,current,is_subscribe,loading,fans,likes,groupInfo,ownerInfo,type,msgList,watcherList,onlineList,watcherType,pullStreamLink,pushStreamLink,room_status,inputMessage} = this.state
+    const {giftMsgList,totalGoods,coin,time,giftCount,curFilterIdx,animationPic,giftSelectIndex,giftList,depositList,location,likeCount,filterList,liverStatus,showExitChoose,backType,fansList,onlineNum,buyerNick,showGift,current,is_subscribe,loading,fans,likes,groupInfo,ownerInfo,type,msgList,watcherList,onlineList,watcherType,pullStreamLink,pushStreamLink,room_status,inputMessage} = this.state
     let newList,goodsList
     let len = this.state.msgList.length
     if(watcherType === 'com'){
@@ -860,10 +861,6 @@ export default class LiveWatcher extends Component{
                 <View className={`more-item order-3`}>
                   <View className='container'/>
                   <View className='like' onClick={this.clickBtn.bind(this,'gift')}><Image src={`${cdn}/like.png`} mode='widthFix' className='like-img'/></View>
-                  {/*{*/}
-                  {/*  showGift &&*/}
-                  {/*<Image src={`${cdn}/${current}.png`} className='img' mode='widthFix' onAnimationEnd={this.animationEnd.bind(this)} style={{zIndex:'100000000'}}/>*/}
-                  {/*}*/}
                 </View>
                 <View className={`more-item order-4`}>
                   <View className='container'/>
@@ -888,7 +885,7 @@ export default class LiveWatcher extends Component{
             type === 'deposit-detail'&&
               <View className='deposit-detail' onClick={this.stop}>
                  <View className='user-info-deposit'>
-                   <View className='cash-dec'><Text>余额:</Text><View className='iconfont icon-jinbi'/><Text>{coin}</Text></View>
+                   <View className='cash-dec'><Text>余额:</Text><Image src={`${cdn}/jinbi.png`} className='coin-img'/><Text>{coin}</Text></View>
                    <View className='deposit-dec'>充值</View>
                  </View>
                 <View className='deposit-list'>
@@ -908,7 +905,7 @@ export default class LiveWatcher extends Component{
                                 item.map((item1,index1) => {
                                   return(
                                     <View className='s-item' onClick={this.handleDeposit.bind(this,item1)}>
-                                      <View className='s-item-top'><View className='iconfont icon-jinbi'/><Text className='coin-amount'>{item1.amount}</Text></View>
+                                      <View className='s-item-top'><Image src={`${cdn}/jinbi.png`} className='coin-img'/><Text className='coin-amount'>{item1.amount}</Text></View>
                                       <View className='coin-price'>{Number(item1.price).toFixed(2)}元</View>
                                     </View>
                                   )
@@ -930,7 +927,7 @@ export default class LiveWatcher extends Component{
            type === 'gift-detail' &&
              <View className='gift-detail' onClick={this.stop}>
                <View className='user-info-cash'>
-                <View className='cash-dec'><Text>余额:</Text><View className='iconfont icon-jinbi'/><Text>{coin}</Text></View>
+                <View className='cash-dec'><Text>余额:</Text><Image src={`${cdn}/jinbi.png`} className='coin-img'/><Text>{coin}</Text></View>
                 <View className='deposit' onClick={this.handleShowDeposit.bind(this)}>充值 ></View>
                </View>
                <View className='gift-send-out'>
@@ -1100,6 +1097,25 @@ export default class LiveWatcher extends Component{
                   <Image mode='widthFix' className='ani-img' src={animationPic} id={'ani'} style={{left:this.caculatePoi(time,index).left+'rpx',top:this.caculatePoi(time,index).top + 'rpx'}} key='gift'/>
                 )
               })
+          }
+          {
+            giftMsgList.length!== 0 &&
+              <View className='gift-msg-list-float'>
+                <FloatMsg
+                 onFloatEnd={this.handleFloatEnd.bind(this)}
+                >
+                  {
+                    giftMsgList.map((item) => {
+                      return(
+                        <View className='msg-item'>
+                          <Text>{item.resource}给主播送了一个</Text><Text className='gift-name'>{item.giftName}</Text>
+                          <Image src={item.giftUrl} className='gift-url'/>
+                        </View>
+                      )
+                    })
+                  }
+                </FloatMsg>
+              </View>
           }
         </View>
       </View>

@@ -58,8 +58,6 @@ export default class SetPopularize extends Component{
       })
      this.setState({
        rebateSpecItems:rebateSpecItems
-     },() => {
-       console.log(this.state.rebateSpecItems)
      })
     })
   }
@@ -189,7 +187,7 @@ export default class SetPopularize extends Component{
                   rebateSpecItems.map((item,index) => {
                     return(
                       <View className='bottom-item'>
-                        <Text className='item-spec'>{item.item_spec_desc}</Text>
+                        <Text className='item-spec'>{item.item_spec_desc || '单规格'}</Text>
                         <View className='item-price'>￥{Number(item.price)/100}</View>
                         <View className='item-type'>
                           <Text className='radio'>比例</Text>

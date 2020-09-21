@@ -1,0 +1,20 @@
+@import '../../style/imports';
+
+.float-msg-content{
+  position: relative;
+  width: 100vw;
+  .msg-scroll-list{
+    width: 100vw;
+    overflow: hidden;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    .content-list{
+      display: flex;
+    }
+    .blank-pos{
+      width: 100vw;
+      flex: none;
+    }
+  }
+}

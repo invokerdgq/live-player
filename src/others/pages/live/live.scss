@@ -8,7 +8,7 @@
 }
 @keyframes out {
   0%   {opacity: 1}
-  100%   {opacity: 0}
+  100%   {opacity:0}
 }
 @keyframes newLike {
   0%   {left: 20px;top: 0;transform: scale(1,1)}
@@ -140,25 +140,30 @@
     width: 100vw;
     background:white;
     border-radius: 20px 20px 0 0 ;
-    padding: 30px 18px;
-    .goods-set-title{
-      margin-top: 30px;
-      color: white;
-      font-size: 32px;
+    padding: 30px 34px;
+    .setting-title{
+      margin-top: 52px;
+      text-align: center;
+      font-size: 36px;
     }
     .set-feature{
       display: flex;
       align-items: center;
-      justify-content: space-around;
-      padding: 30px 18px;
+      justify-content: space-between;
+      margin-top: 43px;
+      margin-bottom: 127px;
       .f-item{
-        height: 60px;
-        padding: 0 12px;
+        width: 335px;
+        height: 80px;
+        background: #F1F1F3;
         border-radius: 8px;
-        background: $color-theme;
-        color: white;
-        text-align: center;
-        line-height: 60px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        .icon-add-sy{
+          font-size: 28px;
+          margin-right: 10px;
+        }
       }
     }
   }
@@ -484,11 +489,23 @@
           font-size: 20px;
           color:white;
           .item{
-            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
           }
           .iconfont{
-            font-size: 48px;
+            width: 48px;
+            height: 48px;
+            font-size: 45px;
+            text-align: center;
             color:white;
+            margin-bottom: 14px;
+          }
+          .reverse-img{
+            width: 48px;
+            height: 48px;
+            display: block;
             margin-bottom: 14px;
           }
         }
@@ -845,10 +862,10 @@
       display: flex;
       color: white;
       align-items: center;
-      .icon-jinbi{
-        font-size: 30px;
-        color: gold;
-        margin: 0 10px;
+      .coin-img{
+        width: 33px;
+        height: 33px;
+        margin:0 10px;
       }
     }
     .deposit{
@@ -947,10 +964,10 @@
     .cash-dec{
       display: flex;
       align-items: center;
-      .icon-jinbi{
-        font-size: 33px;
-        color: gold;
-        margin-right: 10px;
+      .coin-img{
+        width: 33px;
+        height: 33px;
+        margin:0 10px;
       }
     }
     .deposit-dec{
@@ -981,9 +998,9 @@
           &-top{
             display: flex;
             align-items: center;
-            .icon-jinbi{
-              font-size: 28px;
-              color:gold;
+            .coin-img{
+              width: 28px;
+              height: 28px;
             }
             .coin-amount{
               font-size: 38px;
@@ -1007,11 +1024,43 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     margin-top: 16px;
     color:white;
     .iconfont{
-      font-size: 50px;
+      width: 50px;
+      height: 50px;
+      font-size: 45px;
+      text-align: center;
       color:white
+    }
+    .reverse-img{
+      width: 50px;
+      height: 50px;
+      display: block;
+      margin-bottom: 6px;
+    }
+  }
+}
+.gift-msg-list-float{
+  position: absolute;
+  width: 100vw;
+  top:240px;
+  left:0;
+  .msg-item{
+    flex:none;
+    display: flex;
+    height: 100px;
+    align-items: center;
+    padding-right: 30px;
+    width: 100vw;
+    .gift-name{
+      color: $color-theme;
+    }
+    .gift-url{
+      width: 70px;
+      height: 70px;
+      margin-left: 10px;
     }
   }
 }

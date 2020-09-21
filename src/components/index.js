@@ -37,5 +37,6 @@ export { default as OwnProgress } from './progress/progress'
 export { default as OwnOpacity } from './own-opacity/own-opacity'
 export { default as OwnTitle } from './own-title/own-title'
 export { default as OwnPoster } from './own-poster/own-poster'
+export { default as FloatMsg} from './float-msg/float-msg'
 
 export default {}
