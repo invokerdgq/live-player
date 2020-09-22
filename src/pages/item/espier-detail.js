@@ -142,7 +142,7 @@ export default class Detail extends Component {
       }
       Taro.setStorageSync('userinfo', userObj)
     }
-    if(operator_id ){
+    if(operator_id){
       api.store.getShopInfo(operator_id).then((res) => {
         this.setState({
           shopInfo:res

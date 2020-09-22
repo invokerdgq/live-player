@@ -84,6 +84,7 @@ export default class LiveWatcher extends Component{
     Taro.setKeepScreenOn({
       keepScreenOn: true
     })
+    Taro.setStorageSync('is_owner',0)
     entry.entryLaunch(this.$router.params)
     this.setState({
       im_id:this.$router.params.im_id,
@@ -299,8 +300,9 @@ export default class LiveWatcher extends Component{
         })
         break
       case 'Like':
+        this.state.likes = Number(this.state.likes) +1
         this.setState({
-          likes:Number(this.state.likes) +1
+          likes:this.state.likes
         })
         break
       case 'Attention':
@@ -469,6 +471,7 @@ export default class LiveWatcher extends Component{
     e.stopPropagation()
   }
   changeWatcher(type,e){
+    if(this.state.page.isLoading) return
     this.setState({
       watcherType:type
     },() => {
@@ -479,7 +482,9 @@ export default class LiveWatcher extends Component{
       }else{
         this.state.fansList = []
       }
-      this.resetPage(() => { this.nextPage()})
+      this.resetPage(() => {
+        this.nextPage()
+      })
     })
     if(e)e.stopPropagation()
   }
@@ -488,6 +493,9 @@ export default class LiveWatcher extends Component{
       case 'like':
         try{
           const res = await api.live.giveLike({room_id:this.state.im_id})
+          if(res.status === 'ok'){
+            this.tls.like().then(async function(data) {})
+          }
         }catch (e) {
           this.setState({
               numLimit:true
@@ -495,7 +503,6 @@ export default class LiveWatcher extends Component{
           )
           return
         }
-        this.tls.like().then(async function(data) {})
         break
       case 'attend':
         Taro.showLoading({title:'处理中',mask:true})

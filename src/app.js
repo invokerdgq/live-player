@@ -8,6 +8,7 @@ import api from '@/api'
 import { FormIds, WxAuth } from '@/service'
 import Index from './pages/index'
 import entry from "./utils/entry";
+import {tls,TLS} from "./hocs/withTim";
 
 import './app.scss'
 
@@ -311,6 +312,8 @@ useHooks()
     }
 
     componentDidHide () {
+      const is_owner = Taro.getStorageSync('is_owner')
+      if(tls && is_owner == 1){tls.sendCustomMsgAndEmitEvent(TLS.EVENT.ROOM_STATUS_CHANGE,'PAUSE')}
       FormIds.stop()
     }
 

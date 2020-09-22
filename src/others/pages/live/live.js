@@ -1,7 +1,7 @@
 import Taro, { Component } from '@tarojs/taro'
 import {View, Input, Text, Image, ScrollView, LivePusher,Button,Navigator,CoverView} from "@tarojs/components"
 import OwnOpacity from "../../../components/own-opacity/own-opacity"
-import {FilterBar, Loading} from "../../../components";
+import {FilterBar, FloatMsg, Loading} from "../../../components";
 import WatcherItem from "./coms/watcher-item";
 import LiveGoodsItem from "./coms/goodsItem";
 import OwnerModal from './coms/own-modal'
@@ -12,6 +12,7 @@ import api from '@/api'
 import S from '@/spx'
 import TLS from "./tls.min";
 import {connect} from "@tarojs/redux";
+import entry from "../../../utils/entry";
 
 
 @connect(({liveGoods}) => ({
@@ -98,6 +99,7 @@ export default class Live extends Component {
       inputMessage: '',
       msgList: [],
       watcherList: [],
+      giftMsgList:[],
       onlineList: [],
       fansList: [],
       sourceIndex:0,
@@ -122,6 +124,7 @@ componentWillMount() {
     Taro.setKeepScreenOn({
       keepScreenOn: true
     })
+    Taro.setStorageSync('is_owner',1)
      this.fetchMemberInfo()
   }
   async fetchMemberInfo(){
@@ -168,7 +171,7 @@ componentWillMount() {
 
   componentDidHide() {
     if(!this.state.im_id) return
-    if (this.tls) this.tls.sendCustomMsgAndEmitEvent(TLS.EVENT.ROOM_STATUS_CHANGE, 'PAUSE')
+    if (this.tls) {this.tls.sendCustomMsgAndEmitEvent(TLS.EVENT.ROOM_STATUS_CHANGE, 'PAUSE')}
   }
   async fetchConfig(){
     const {GroupInfo,product} = await api.live.getConfig()
@@ -329,8 +332,9 @@ componentWillMount() {
         })
         break
       case 'Like':
+        this.state.likes = Number(this.state.likes) + 1
         this.setState({
-          likes: Number(this.state.likes) + 1
+          likes:this.state.likes
         })
         break
       case 'Attention':
@@ -354,12 +358,14 @@ componentWillMount() {
         })
         break
       case 'SendGift':
-        msg.push({
-          user_name:formate(data.nick),
-          user_message:`给主播送了一个${data.value}`
-        })
+        let obj = entry.parseUrlStr(data.value)
+        let giftMsgItem = {
+          giftName:obj.giftName,
+          giftUrl:obj.giftUrl,
+          resource:data.nick
+        }
         this.setState({
-          msgList:msg
+          giftMsgList:[...this.state.giftMsgList,giftMsgItem]
         })
         break
       case 'AddGoods':
@@ -493,8 +499,14 @@ componentWillMount() {
   stop(e) {
     e.stopPropagation()
   }
-
+  handleLike(){
+    this.setState({
+      likeCount:[...this.state.likeCount,1]
+    })
+    this.clickBtn('like')
+  }
   changeWatcher(type,e){
+    if(this.state.page.isLoading) return
     this.setState({
       watcherType: type
     }, () => {
@@ -517,15 +529,15 @@ componentWillMount() {
       case 'like':
         try {
           const res = await api.live.giveLike({room_id: this.state.im_id})
+          if(res.status === 'ok'){
+            this.tls.like().then(async function (data) {})
+          }
         } catch (e) {
           this.setState({
               numLimit: true
             }
           )
-          return
         }
-        this.tls.like().then(async function (data) {
-        })
         break
       case 'attend':
         Taro.showLoading({title: '处理中', mask: true})
@@ -756,8 +768,13 @@ componentWillMount() {
       sourceIndex:e.current
     })
   }
+  handleFloatEnd(){
+    this.setState({
+      giftMsgList:[]
+    })
+  }
   render() {
-    const {sourceList,sourceIndex,preViewUrl,form,position,bCurIndex,fCurIndex,setType,im_id,location, likeCount, filterList,beautifyList, liverStatus, showExitChoose, backType, fansList, onlineNum, buyerNick, showGift, current, is_subscribe, loading, fans, likes, groupInfo, ownerInfo, type, msgList, watcherList, onlineList, watcherType,  pullStreamLink, pushStreamLink, room_status, inputMessage} = this.state
+    const {giftMsgList,sourceList,sourceIndex,form,position,bCurIndex,fCurIndex,setType,im_id,location, likeCount, filterList,beautifyList, liverStatus, showExitChoose, backType, fansList, onlineNum, buyerNick, showGift, current, is_subscribe, loading, fans, likes, groupInfo, ownerInfo, type, msgList, watcherList, onlineList, watcherType,  pullStreamLink, pushStreamLink, room_status, inputMessage} = this.state
     let newList,setList,goodsList
     let len = this.state.msgList.length
     if (watcherType === 'com') {
@@ -959,13 +976,9 @@ componentWillMount() {
                 </View>
                 <View className={`more-item ${this.state.owner == 0 ? 'order-3' : 'order-2'}`}>
                   <View className='container'/>
-                  <View className='like' onClick={this.clickBtn.bind(this, 'gift')}><Image src={`${cdn}/like.png`}
-                                                                                           mode='widthFix'
-                                                                                           className='like-img'/></View>
-                  {showGift &&
-                  <Image src={`${cdn}/${current}.png`} className='img' mode='widthFix'
-                         onAnimationEnd={this.animationEnd.bind(this)} style={{zIndex: '100000000'}}/>
-                  }
+                  <View className='like' onClick={this.handleLike.bind(this, 'gift')}>
+                    <Image src={`${cdn}/like.png`} mode='widthFix' className='like-img'/>
+                  </View>
                 </View>
                 <View className={`more-item ${this.state.owner == 0 ? 'order-4' : 'order-3'}`}>
                   <View className='container'/>
@@ -1156,6 +1169,25 @@ componentWillMount() {
                 <View className='item' onClick={this.changeConfig.bind(this,'pusher/filter')}><View className='iconfont icon-filt'/><Text>滤镜</Text></View>
                 <View className='item' onClick={this.changeConfig.bind(this,'goods')}><View className='iconfont icon-gouwucheman'/><Text>商品</Text></View>
               </View>
+          }
+          {
+            giftMsgList.length!== 0 &&
+            <View className='gift-msg-list-float'>
+              <FloatMsg
+                onFloatEnd={this.handleFloatEnd.bind(this)}
+              >
+                {
+                  giftMsgList.map((item) => {
+                    return(
+                      <View className='msg-item'>
+                        <Text>{item.resource}给主播送了一个</Text><Text className='gift-name'>{item.giftName}</Text>
+                        <Image src={item.giftUrl} className='gift-url'/>
+                      </View>
+                    )
+                  })
+                }
+              </FloatMsg>
+            </View>
           }
         </View>
       </View>
