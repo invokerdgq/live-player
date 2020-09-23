@@ -156,6 +156,7 @@ componentWillMount() {
   }
   componentDidMount() {
     if(S.getAuthToken()){
+      this.updateSurplus()
       this.fetchConfig()
     }
   }
@@ -172,6 +173,12 @@ componentWillMount() {
   componentDidHide() {
     if(!this.state.im_id) return
     if (this.tls) {this.tls.sendCustomMsgAndEmitEvent(TLS.EVENT.ROOM_STATUS_CHANGE, 'PAUSE')}
+  }
+  async updateSurplus(){
+    const {coin} = await api.live.getCoinSurplus()
+    this.setState({
+      coin
+    })
   }
   async fetchConfig(){
     const {GroupInfo,product} = await api.live.getConfig()
@@ -568,6 +575,8 @@ componentWillMount() {
           icon: 'none'
         })
         break
+      case 'gift-receive':
+        break
       default :
         Taro.showToast({
           title: '暂未开放',
@@ -774,7 +783,7 @@ componentWillMount() {
     })
   }
   render() {
-    const {giftMsgList,sourceList,sourceIndex,form,position,bCurIndex,fCurIndex,setType,im_id,location, likeCount, filterList,beautifyList, liverStatus, showExitChoose, backType, fansList, onlineNum, buyerNick, showGift, current, is_subscribe, loading, fans, likes, groupInfo, ownerInfo, type, msgList, watcherList, onlineList, watcherType,  pullStreamLink, pushStreamLink, room_status, inputMessage} = this.state
+    const {coin,giftMsgList,sourceList,sourceIndex,form,position,bCurIndex,fCurIndex,setType,im_id,location, likeCount, filterList,beautifyList, liverStatus, showExitChoose, backType, fansList, onlineNum, buyerNick, showGift, current, is_subscribe, loading, fans, likes, groupInfo, ownerInfo, type, msgList, watcherList, onlineList, watcherType,  pullStreamLink, pushStreamLink, room_status, inputMessage} = this.state
     let newList,setList,goodsList
     let len = this.state.msgList.length
     if (watcherType === 'com') {
@@ -819,7 +828,7 @@ componentWillMount() {
                 containerClass='contain-dec'
                 renderTrue={
                   <View className='header-contain'>
-                    <View className='avatar'><Image mode='widthFix' className='img' src={ownerInfo.avatar}/></View>
+                    <View className='avatar' onClick={this.showMoreDec.bind(this, 'live-detail')}><Image mode='widthFix' className='img' src={ownerInfo.avatar}/></View>
                     <View className='room-dec'>
                       <View className='room-dec-name'
                             onClick={this.showMoreDec.bind(this, 'live-detail')}><Text>{groupInfo.name}</Text></View>
@@ -1013,17 +1022,15 @@ componentWillMount() {
                   <View className='user_dec_more_item'
                         onClick={this.showMoreDec.bind(this, 'watcher-detail', 'fans')}><Text
                     className='dec-data'>{fans}</Text><Text className='dec-dec'>粉丝</Text></View>
-                  <View className='user_dec_more_item'><Text className='dec-data'>暂未开放</Text><Text
-                    className='dec-dec'>送出</Text></View>
+                  <View className='user_dec_more_item'><Text className='dec-data'>...</Text><Text
+                    className='dec-dec'>礼物收益</Text></View>
                   <View className='user_dec_more_item'><Text className='dec-data'>{likes ? likes : 0}</Text><Text
                     className='dec-dec'>收到点赞</Text></View>
                 </View>
               </View>
               <View className='live-detail-footer'>
-                <View className='dec-attend'
-                      onClick={this.clickBtn.bind(this, 'attend')}>{is_subscribe == 0 ? '关注' : '已关注'}</View>
-                <View className='store' onClick={this.clickBtn.bind(this, 'store')}>TA的店铺</View>
-                <View className='dec-main' onClick={this.clickBtn.bind(this, 'main')}>主页</View>
+                <View className='dec-main' onClick={this.clickBtn.bind(this, 'gift-receive')}>我的收益</View>
+                <View className='store' onClick={this.clickBtn.bind(this, 'store')}>我的店铺</View>
               </View>
             </View>
           }

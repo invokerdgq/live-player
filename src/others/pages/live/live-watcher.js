@@ -764,7 +764,7 @@ export default class LiveWatcher extends Component{
                 containerClass='contain-dec'
                 renderTrue={
                   <View className='header-contain'>
-                    <View className='avatar'><Image mode='widthFix' className='img' src={ownerInfo.avatar}/></View>
+                    <View className='avatar' onClick={this.showMoreDec.bind(this, 'live-detail')}><Image mode='widthFix' className='img' src={ownerInfo.avatar}/></View>
                     <View className='room-dec'>
                       <View className='room-dec-name' onClick={this.showMoreDec.bind(this,'live-detail')}><Text>{groupInfo.name}</Text></View>
                       <View className='room-dec-more'>
@@ -1001,14 +1001,13 @@ export default class LiveWatcher extends Component{
                 <View className='user_dec_more'>
                   <View className='user_dec_more_item'><Text className='dec-data'>暂未开放</Text><Text className='dec-dec'>交易</Text></View>
                   <View className='user_dec_more_item' onClick={this.showMoreDec.bind(this,'watcher-detail','fans')}><Text className='dec-data'>{fans}</Text><Text className='dec-dec'>粉丝</Text></View>
-                  <View className='user_dec_more_item'><Text className='dec-data'>暂未开放</Text><Text className='dec-dec'>送出</Text></View>
+                  <View className='user_dec_more_item'><Text className='dec-data'>暂未开放</Text><Text className='dec-dec'>收到礼物</Text></View>
                   <View className='user_dec_more_item'><Text className='dec-data'>{likes?likes:0}</Text><Text className='dec-dec'>收到点赞</Text></View>
                 </View>
               </View>
               <View className='live-detail-footer'>
                 <View className='dec-attend' onClick={this.clickBtn.bind(this,'attend')}>{is_subscribe == 0?'关注':'已关注'}</View>
                 <View className='store' onClick={this.clickBtn.bind(this,'store')}>TA的店铺</View>
-                <View className='dec-main' onClick={this.clickBtn.bind(this,'main')}>主页</View>
               </View>
             </View>
           }
